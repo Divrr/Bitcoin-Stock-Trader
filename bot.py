@@ -45,7 +45,7 @@ buy_signals = df[df['buy_signal']]
 sell_signals = df[df['sell_signal']]
 
 money -= (buy_signals["close"] + buy_sell_cost).sum()
-money += (sell_signals["close"] - buy_sell_cost).sum()
+money += (sell_signals["close"] + buy_sell_cost).sum()
 
 print("You have made: $" + str(money))
 
