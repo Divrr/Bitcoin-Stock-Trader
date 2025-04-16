@@ -24,7 +24,7 @@ class EvaluationFunction:
             return weights / weights.sum()
 
         def lma(N):
-            weights = np.linspace(1, N, N)
+            weights = np.linspace(N, 1, N)
             return weights / weights.sum()
         
         def ema(N, alpha):
@@ -47,34 +47,6 @@ class EvaluationFunction:
         self.high_filter = calculate_filter(high_filter)
 
         return [self.low_filter, self.high_filter]
-
-    def _calculate_signals(self, df):
-        def wma(P, kernel):
-            padding = P[:len(kernel) - 1][::-1]
-            P = np.concatenate((padding, P))
-
-            return np.convolve(P, kernel, "valid")
-    
-        df["low"] = wma(df["close"], self.low_filter)
-        df["high"] = wma(df["close"], self.high_filter)
-
-        df["diff"] = df['high'] - df['low']
-        df['sell_signal'] = (df['diff'].shift(1) < 0) & (df['diff'] >= 0)
-        df['buy_signal'] = (df['diff'].shift(1) > 0) & (df['diff'] <= 0)
-
-        return df
-
-    def calculate_fitness(self):
-        self.df = self._calculate_signals(self.df)
-
-        buy_signals = self.df[self.df['buy_signal']]
-        sell_signals = self.df[self.df['sell_signal']]
-
-        money = self.money
-        money -= (buy_signals["close"] + self.transaction_cost).sum()
-        money += (sell_signals["close"] - self.transaction_cost).sum()
-
-        return money
     
     def plot_filters(self):
         if not self.low_filter.all or not self.high_filter.all:
@@ -88,15 +60,48 @@ class EvaluationFunction:
         plt.title("Low and High Filters")
         plt.xlabel("Index")
         plt.ylabel("Filter Value")
+        plt.grid()
         plt.legend()
-        plt.grid(True)
-        plt.tight_layout()
-
         plt.show()
 
-    def plot_signals(self):
-        self.df = self._calculate_signals(self.df)
+    def generate_signals(self):
+        def wma(P, kernel):
+            padding = P[:len(kernel) - 1][::-1]
+            P = np.concatenate((padding, P))
+            return np.convolve(P, kernel, "valid")
+        
+        df = self.df 
+    
+        df["low"] = wma(df["close"], self.low_filter)
+        df["high"] = wma(df["close"], self.high_filter)
 
+        df["diff"] = df['high'] - df['low']
+        df['sell_signal'] = (df['diff'].shift(1) < 0) & (df['diff'] >= 0)
+        df['buy_signal'] = (df['diff'].shift(1) > 0) & (df['diff'] <= 0)
+
+        return df
+
+    def calculate_fitness(self):
+        cash = self.money
+        bitcoin = 0
+        cash_column = []
+
+        for index, row in self.df.iterrows():
+            if row['buy_signal'] and cash > 0:
+                cash -= cash * self.transaction_cost
+                bitcoin = cash / row['close']
+                cash = 0
+            elif row['sell_signal'] and bitcoin > 0:
+                cash = bitcoin * row['close']
+                cash -= cash * self.transaction_cost
+                bitcoin = 0
+            cash_column.append((cash + (bitcoin * row['close'])))
+
+        self.df['profit'] = cash_column
+        
+        return cash_column[-1]
+        
+    def plot_signals(self):
         plt.figure(figsize=(12, 6))
 
         plt.plot(self.df.index, self.df["close"], label="Close", linewidth=0.5)
@@ -106,22 +111,25 @@ class EvaluationFunction:
         plt.scatter(self.df.index[self.df['buy_signal']], self.df['close'][self.df['buy_signal']] + 2000, label="Buy Signal", marker="^", color="green", alpha=0.7, s=10)
         plt.scatter(self.df.index[self.df['sell_signal']], self.df['close'][self.df['sell_signal']] + 2000, label="Sell Signal", marker="v", color="red", alpha=0.7, s=10)
 
-        plt.title("Bitcoin Stock Trading Signals")
+        plt.title("Bitcoin Stock Trading Signals and Profit")
         plt.xlabel("Date")
         plt.ylabel("Price")
-        plt.legend()
-        plt.grid(True)
-        plt.xticks(rotation=45)
-        plt.tight_layout()
+        plt.legend(loc="upper left")
+        plt.grid()
 
+        plt.xticks(rotation=45)
         plt.show()
 
 
 if __name__ == "__main__":
     daily = "data/BTC-Daily.csv"
-    evaluator = EvaluationFunction(daily, end_date="2020-01-01")
 
-    evaluator.set_filters([0.6, 0, 0.4, 10, 0, 10, 0.2], [1, 0, 0, 30, 0, 0, 0])
+    evaluator = EvaluationFunction(daily, start_date="2017-01-01", end_date="2020-01-01")
+    evaluator.set_filters([1, 0, 1, 10, 0, 10, 0.5], [1, 0, 0, 20, 0, 0, 0])
     evaluator.plot_filters()
-    print(evaluator.calculate_fitness())
+    
+    evaluator.generate_signals()
     evaluator.plot_signals()
+    
+    profit = evaluator.calculate_fitness()
+    print(profit)
