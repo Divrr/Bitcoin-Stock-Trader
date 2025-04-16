@@ -4,30 +4,59 @@ import matplotlib.pyplot as plt
 import time
 
 class EvaluationFunction:
-    def __init__(self, csv_source, transaction_cost=0, start_date=None, end_date=None, starting_budget=0):
+    def __init__(self, csv_source, transaction_cost=0.03, start_date=None, end_date=None, starting_budget=1000):
         self.transaction_cost = transaction_cost
         self.money = starting_budget
 
-        df = pd.concat([pd.read_csv(file) for file in csv_source])
+        if isinstance(csv_source, str): df = pd.read_csv(csv_source)
+        else: df = pd.concat([pd.read_csv(file) for file in csv_source])
+
         df.index = pd.to_datetime(df.pop("date"))
         df = df.sort_index().loc[start_date:end_date]
 
         self.df = df
-        self.model_parameters = np.zeros(2, dtype=float)
-
-    def _calculate_signals(self, df, low_sma, high_sma):
-        def pad(P,N):
-            padding = np.flip(P[1:N])
-            return np.append(padding, P)
-
-        def wma(P,N,kernel):
-            return np.convolve(pad(P,N), kernel, "valid")
-        
-        def sma_filter(N):
-            return np.ones(N)/N
+        self.low_filter = None
+        self.high_filter = None
     
-        df["low"] = wma(df["close"], low_sma, sma_filter(low_sma))
-        df["high"] = wma(df["close"], high_sma, sma_filter(high_sma))
+    def set_filters(self, low_filter, high_filter):
+        def sma(N):
+            weights = np.ones(N)
+            return weights / weights.sum()
+
+        def lma(N):
+            weights = np.linspace(1, N, N)
+            return weights / weights.sum()
+        
+        def ema(N, alpha):
+            weights = np.array([(1 - alpha) ** i for i in range(N)])
+            return weights / weights.sum()
+        
+        def calculate_filter(filter_values):
+            w1, w2, w3, d1, d2, d3, a3 = filter_values
+            max_d = max(d1, d2, d3)
+
+            filters = [
+            w1 * np.pad(sma(d1), (0, max_d - d1), 'constant'),
+            w2 * np.pad(lma(d2), (0, max_d - d2), 'constant'),
+            w3 * np.pad(ema(d3, a3), (0, max_d - d3), 'constant')
+            ]
+
+            return sum(filters) / (w1 + w2 + w3)
+
+        self.low_filter = calculate_filter(low_filter)
+        self.high_filter = calculate_filter(high_filter)
+
+        return [self.low_filter, self.high_filter]
+
+    def _calculate_signals(self, df):
+        def wma(P, kernel):
+            padding = P[:len(kernel) - 1][::-1]
+            P = np.concatenate((padding, P))
+
+            return np.convolve(P, kernel, "valid")
+    
+        df["low"] = wma(df["close"], self.low_filter)
+        df["high"] = wma(df["close"], self.high_filter)
 
         df["diff"] = df['high'] - df['low']
         df['sell_signal'] = (df['diff'].shift(1) < 0) & (df['diff'] >= 0)
@@ -36,8 +65,7 @@ class EvaluationFunction:
         return df
 
     def calculate_fitness(self):
-        low_sma, high_sma = self.model_parameters
-        self.df = self._calculate_signals(self.df, low_sma, high_sma)
+        self.df = self._calculate_signals(self.df)
 
         buy_signals = self.df[self.df['buy_signal']]
         sell_signals = self.df[self.df['sell_signal']]
@@ -47,10 +75,27 @@ class EvaluationFunction:
         money += (sell_signals["close"] - self.transaction_cost).sum()
 
         return money
+    
+    def plot_filters(self):
+        if not self.low_filter.all or not self.high_filter.all:
+            raise ValueError("Low and High filters must be set before plotting.")
+        
+        plt.figure(figsize=(10, 5))
+
+        plt.plot(self.low_filter, label="Low Filter", marker="o", linestyle="-", alpha=0.7)
+        plt.plot(self.high_filter, label="High Filter", marker="s", linestyle="--", alpha=0.7)
+
+        plt.title("Low and High Filters")
+        plt.xlabel("Index")
+        plt.ylabel("Filter Value")
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+
+        plt.show()
 
     def plot_signals(self):
-        low_sma, high_sma = self.model_parameters
-        self.df = self._calculate_signals(self.df, low_sma, high_sma)
+        self.df = self._calculate_signals(self.df)
 
         plt.figure(figsize=(12, 6))
 
@@ -73,11 +118,10 @@ class EvaluationFunction:
 
 
 if __name__ == "__main__":
-    files = ["data/BTC-Daily.csv"]
-    evaluator = EvaluationFunction(files, transaction_cost=10, end_date="2020-01-01")
-    evaluator.model_parameters = [10, 20]
+    daily = "data/BTC-Daily.csv"
+    evaluator = EvaluationFunction(daily, end_date="2020-01-01")
 
-    profit = evaluator.calculate_fitness()
-    print(f"Profit: {profit}")
-
+    evaluator.set_filters([0.6, 0, 0.4, 10, 0, 10, 0.2], [1, 0, 0, 30, 0, 0, 0])
+    evaluator.plot_filters()
+    print(evaluator.calculate_fitness())
     evaluator.plot_signals()
