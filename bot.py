@@ -128,19 +128,12 @@ class EvaluationFunction:
 if __name__ == "__main__":
     daily = "data/BTC-Daily.csv"
 
-    # Training evaluator (2017–2019)
-    evaluator_train = EvaluationFunction(daily, start_date="2017-01-01", end_date="2019-12-31")
-
-    # Test evaluator (2020+)
-    evaluator_test = EvaluationFunction(daily, start_date="2020-01-01", end_date="2022-12-31")
-
-
-    # evaluator = EvaluationFunction(daily, start_date="2017-01-01", end_date="2020-01-01")
-    evaluator_train.set_filters([1, 0, 1, 10, 0, 10, 0.5], [1, 0, 0, 20, 0, 0, 0])
-    evaluator_train.plot_filters()
+    evaluator = EvaluationFunction(daily, start_date="2017-01-01", end_date="2020-01-01")
+    evaluator.set_filters([1, 0, 1, 10, 0, 10, 0.5], [1, 0, 0, 20, 0, 0, 0])
+    evaluator.plot_filters()
     
-    evaluator_train.generate_signals()
-    evaluator_train.plot_signals()
+    evaluator.generate_signals()
+    evaluator.plot_signals()
     
-    profit = evaluator_train.calculate_fitness()
+    profit = evaluator.calculate_fitness()
     print(profit)
