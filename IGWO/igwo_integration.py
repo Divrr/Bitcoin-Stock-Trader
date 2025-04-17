@@ -44,10 +44,39 @@ if best_params is not None:
 else:
     print("Optimization failed — no valid solution found.")
 
-
-# Optional: test performance on unseen data
+# Test performance on unseen data
 evaluator_test = EvaluationFunction("data/BTC-Daily.csv", start_date="2020-01-01", end_date="2022-12-31")
 evaluator_test.set_filters(best_params[:7], best_params[7:])
 evaluator_test.generate_signals()
 evaluator_test.plot_signals()
 print(f"Profit on test data: ${evaluator_test.calculate_fitness():.2f}")
+
+
+
+
+
+
+
+
+
+
+
+"""if best_params is not None:
+    print("Low Filter :", best_params[:7])
+    print("High Filter:", best_params[7:])
+    print(f"Profit on training data: ${-best_score:.2f}")
+
+    # Test on unseen data
+    evaluator_test = EvaluationFunction("data/BTC-Daily.csv", start_date="2020-01-01", end_date="2022-12-31")
+    evaluator_test.set_filters(best_params[:7], best_params[7:])
+    evaluator_test.generate_signals()
+    
+    test_profit = evaluator_test.calculate_fitness()
+    print(f"Profit on test data: ${test_profit:.2f}")  # PRINT FIRST
+    
+    evaluator_test.plot_signals()  # Show plot after print
+else:
+    print("❌ Optimization failed — no valid solution found.")
+"""
+
+
