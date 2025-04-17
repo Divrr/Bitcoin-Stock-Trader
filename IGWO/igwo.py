@@ -84,6 +84,6 @@ class IGWO:
                     alpha_score = mutated_score
                     alpha_pos = mutated_alpha
 
-            print(f"Iteration {iter + 1}/{self.max_iter}, Best Fitness: {alpha_score:.2f}")
+            print(f"Iteration {iter + 1}/{self.max_iter}, Best Fitness in IGWO: {alpha_score:.2f}")
 
         return alpha_pos, alpha_score

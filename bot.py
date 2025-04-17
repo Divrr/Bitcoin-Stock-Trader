@@ -32,7 +32,11 @@ class EvaluationFunction:
             return weights / weights.sum()
         
         def calculate_filter(filter_values):
-            w1, w2, w3, d1, d2, d3, a3 = filter_values
+            # w1, w2, w3, d1, d2, d3, a3 = filter_values
+            w1, w2, w3 = filter_values[:3]
+            d1, d2, d3 = map(int, map(round, filter_values[3:6]))
+            a3 = float(filter_values[6])
+            
             max_d = max(d1, d2, d3)
 
             filters = [
@@ -121,15 +125,3 @@ class EvaluationFunction:
         plt.show()
 
 
-if __name__ == "__main__":
-    daily = "data/BTC-Daily.csv"
-
-    evaluator = EvaluationFunction(daily, start_date="2017-01-01", end_date="2020-01-01")
-    evaluator.set_filters([1, 0, 1, 10, 0, 10, 0.5], [1, 0, 0, 20, 0, 0, 0])
-    evaluator.plot_filters()
-    
-    evaluator.generate_signals()
-    evaluator.plot_signals()
-    
-    profit = evaluator.calculate_fitness()
-    print(profit)
