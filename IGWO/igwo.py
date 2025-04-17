@@ -1,3 +1,8 @@
+"""
+Author: Anushka Dissanayaka Mudiyanselage
+Date: April 2025
+"""
+
 import numpy as np
 
 class IGWO:

@@ -1,3 +1,7 @@
+"""
+Author: Anushka Dissanayaka Mudiyanselage
+Date: April 2025
+"""
 import sys
 import os
 
@@ -6,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 from bot import EvaluationFunction
-from igwo import IGWO  # assuming your improved GWO class is named IGWO
+from igwo import IGWO  
 import numpy as np
 
 # Define bounds: 14 dimensions (weights, window sizes, alphas) for low + high filters
@@ -38,7 +42,7 @@ if best_params is not None:
     print("High Filter:", best_params[7:])
     print(f"Profit on training data: ${-best_score:.2f}")
 else:
-    print("❌ Optimization failed — no valid solution found.")
+    print("Optimization failed — no valid solution found.")
 
 
 # Optional: test performance on unseen data
