@@ -3,74 +3,137 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 
-start = time.time()
+class Evaluator:
+    def __init__(self, csv_source, transaction_cost=0.03, start_date=None, end_date=None, starting_budget=1000):
+        self.transaction_cost = transaction_cost
+        self.money = starting_budget
 
-df17 = pd.read_csv("data/BTC-2017min.csv")
-df18 = pd.read_csv("data/BTC-2018min.csv")
-df19 = pd.read_csv("data/BTC-2019min.csv")
-df = pd.concat([df17, df18, df19])
+        if isinstance(csv_source, str): df = pd.read_csv(csv_source)
+        else: df = pd.concat([pd.read_csv(file) for file in csv_source])
 
-df.index = pd.to_datetime(df.pop("date"))
+        df.index = pd.to_datetime(df.pop("date"))
+        df = df.sort_index().loc[start_date:end_date]
 
-#--------------------------------------
-def pad(P,N):
-    padding = np.flip(P[1:N])
-    return np.append(padding, P)
+        self.df = df
+        self.low_filter = None
+        self.high_filter = None
+    
+    def set_filters(self, low_filter, high_filter):
+        def sma(N):
+            weights = np.array([1 for k in range(N)])
+            return weights * N
 
-def wma(P,N,kernel):
-    return np.convolve(pad(P,N), kernel, "valid")
-# source: bot.pdf
-#--------------------------------------
-# FILTERS
-def sma_filter(N):
-    return np.ones(N)/N
-#--------------------------------------
-# BOT
-start_date = "2017-01-01"
-end_date = "2020-01-01"
-buy_sell_cost = 0
-money = 0
-low_sma = 2000
-high_sma = 4000
+        def lma(N):
+            weights = np.array([1-k/N for k in range(N)])
+            return weights * (2/(N+1))
+        
+        def ema(N, alpha):
+            weights = np.array([(1 - alpha) ** k for k in range(N)])
+            return weights * alpha
+        
+        def calculate_filter(filter_values):
+            w1, w2, w3 = filter_values[:3]
+            d1, d2, d3 = map(int, map(round, filter_values[3:6]))
+            a3 = float(filter_values[6])
+            
+            max_d = max(d1, d2, d3)
 
-df = df.sort_index().loc[start_date:end_date]
-df["low"] = wma(df["close"], low_sma, sma_filter(low_sma))
-df["high"] = wma(df["close"], high_sma, sma_filter(high_sma))
+            filters = [
+            w1 * np.pad(sma(d1), (0, max_d - d1), 'constant'),
+            w2 * np.pad(lma(d2), (0, max_d - d2), 'constant'),
+            w3 * np.pad(ema(d3, a3), (0, max_d - d3), 'constant')
+            ]
 
-df["diff"] = df['high'] - df['low']
-df['sell_signal'] = (df['diff'].shift(1) < 0) & (df['diff'] >= 0)
-df['buy_signal'] = (df['diff'].shift(1) > 0) & (df['diff'] <= 0)
+            return sum(filters) / (w1 + w2 + w3)
 
-buy_signals = df[df['buy_signal']]
-sell_signals = df[df['sell_signal']]
+        self.low_filter = calculate_filter(low_filter)
+        self.high_filter = calculate_filter(high_filter)
 
-money -= (buy_signals["close"] + buy_sell_cost).sum()
-money += (sell_signals["close"] + buy_sell_cost).sum()
+        return [self.low_filter, self.high_filter]
+    
+    def plot_filters(self):
+        if not self.low_filter.all or not self.high_filter.all:
+            raise ValueError("Low and High filters must be set before plotting.")
+        
+        plt.figure(figsize=(10, 5))
 
-print("You have made: $" + str(money))
+        plt.plot(self.low_filter, label="Low Filter", marker="o", linestyle="-", alpha=0.7)
+        plt.plot(self.high_filter, label="High Filter", marker="s", linestyle="--", alpha=0.7)
 
-#--------------------------------------
-# PLOT
-plt.figure(figsize=(12, 6))
+        plt.title("Low and High Filters")
+        plt.xlabel("Index")
+        plt.ylabel("Filter Value")
+        plt.ylim(ymin=0)
+        plt.grid()
+        plt.legend()
+        plt.show()
 
-plt.plot(df.index, df["close"], label="Close", linewidth=0.5)
-plt.plot(df.index, df["low"], label="Low", linestyle="--", alpha=0.5)
-plt.plot(df.index, df["high"], label="High", linestyle="--", alpha=0.5)
+    def generate_signals(self):
+        def wma(P, kernel):
+            padding = P[:len(kernel) - 1][::-1]
+            P = np.concatenate((padding, P))
+            return np.convolve(P, kernel, "valid")
+        
+        df = self.df 
+    
+        df["low"] = wma(df["close"], self.low_filter)
+        df["high"] = wma(df["close"], self.high_filter)
 
-plt.scatter(df.index[df['buy_signal']], df['close'][df['buy_signal']] + 2000, label="Buy Signal", marker="^", color="green", alpha=0.7, s=10)
-plt.scatter(df.index[df['sell_signal']], df['close'][df['sell_signal']] + 2000, label="Sell Signal", marker="v", color="red", alpha=0.7, s=10)
+        df["diff"] = df['high'] - df['low']
+        df['sell_signal'] = (df['diff'].shift(1) < 0) & (df['diff'] >= 0)
+        df['buy_signal'] = (df['diff'].shift(1) > 0) & (df['diff'] <= 0)
 
-plt.title("Bitcoin Stock Trading Signals")
-plt.xlabel("Date")
-plt.ylabel("Price")
-plt.legend()
-plt.grid(True)
-plt.xticks(rotation=45)
-plt.tight_layout()
+        return df
 
-end=time.time()
-print(end-start)
+    def calculate_fitness(self):
+        cash = self.money
+        bitcoin = 0
+        cash_column = []
 
-plt.show()
+        for index, row in self.df.iterrows():
+            if row['buy_signal'] and cash > 0:
+                cash -= cash * self.transaction_cost
+                bitcoin = cash / row['close']
+                cash = 0
+            elif row['sell_signal'] and bitcoin > 0:
+                cash = bitcoin * row['close']
+                cash -= cash * self.transaction_cost
+                bitcoin = 0
+            cash_column.append((cash + (bitcoin * row['close'])))
 
-#test
+        self.df['profit'] = cash_column
+        
+        return cash_column[-1]
+        
+    def plot_signals(self):
+        plt.figure(figsize=(12, 6))
+
+        plt.plot(self.df.index, self.df["close"], label="Close", linewidth=0.5)
+        plt.plot(self.df.index, self.df["low"], label="Low", linestyle="--", alpha=0.5)
+        plt.plot(self.df.index, self.df["high"], label="High", linestyle="--", alpha=0.5)
+
+        plt.scatter(self.df.index[self.df['buy_signal']], self.df['close'][self.df['buy_signal']] + 2000, label="Buy Signal", marker="^", color="green", alpha=0.7, s=10)
+        plt.scatter(self.df.index[self.df['sell_signal']], self.df['close'][self.df['sell_signal']] + 2000, label="Sell Signal", marker="v", color="red", alpha=0.7, s=10)
+
+        plt.title("Bitcoin Stock Trading Signals and Profit")
+        plt.xlabel("Date")
+        plt.ylabel("Price")
+        plt.legend(loc="upper left")
+        plt.grid()
+
+        plt.xticks(rotation=45)
+        plt.show()
+
+
+if __name__ == "__main__":
+    daily = "data/BTC-Daily.csv"
+
+    evaluator = Evaluator(daily, start_date="2017-01-01", end_date="2019-12-31")
+    evaluator.set_filters([1, 0, 1, 10, 0, 10, 0.5], [1, 0, 0, 20, 0, 0, 0])
+    evaluator.plot_filters()
+    
+    evaluator.generate_signals()
+    evaluator.plot_signals()
+    
+    profit = evaluator.calculate_fitness()
+    print(profit)
