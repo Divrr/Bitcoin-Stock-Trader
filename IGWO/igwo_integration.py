@@ -9,7 +9,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
-from bot import EvaluationFunction
+from bot import Evaluator
 from igwo import IGWO  
 import numpy as np
 
@@ -22,7 +22,7 @@ def fitness_function(params):
     try:
         low_filter = params[:7]
         high_filter = params[7:]
-        evaluator_train = EvaluationFunction("data/BTC-Daily.csv", start_date="2017-01-01", end_date="2019-12-31")
+        evaluator_train = Evaluator("data/BTC-Daily.csv", start_date="2017-01-01", end_date="2019-12-31")
         evaluator_train.set_filters(low_filter, high_filter)
         evaluator_train.generate_signals()
         return -evaluator_train.calculate_fitness()
@@ -45,7 +45,7 @@ else:
     print("Optimization failed — no valid solution found.")
 
 # Test performance on unseen data
-evaluator_test = EvaluationFunction("data/BTC-Daily.csv", start_date="2020-01-01", end_date="2022-12-31")
+evaluator_test = Evaluator("data/BTC-Daily.csv", start_date="2020-01-01", end_date="2022-12-31")
 evaluator_test.set_filters(best_params[:7], best_params[7:])
 evaluator_test.generate_signals()
 evaluator_test.plot_signals()
