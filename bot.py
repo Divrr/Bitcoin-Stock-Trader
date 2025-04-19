@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 
-class EvaluationFunction:
+class Evaluator:
     def __init__(self, csv_source, transaction_cost=0.03, start_date=None, end_date=None, starting_budget=1000):
         self.transaction_cost = transaction_cost
         self.money = starting_budget
@@ -20,19 +20,22 @@ class EvaluationFunction:
     
     def set_filters(self, low_filter, high_filter):
         def sma(N):
-            weights = np.ones(N)
-            return weights / weights.sum()
+            weights = np.array([1 for k in range(N)])
+            return weights * N
 
         def lma(N):
-            weights = np.linspace(N, 1, N)
-            return weights / weights.sum()
+            weights = np.array([1-k/N for k in range(N)])
+            return weights * (2/(N+1))
         
         def ema(N, alpha):
-            weights = np.array([(1 - alpha) ** i for i in range(N)])
-            return weights / weights.sum()
+            weights = np.array([(1 - alpha) ** k for k in range(N)])
+            return weights * alpha
         
         def calculate_filter(filter_values):
-            w1, w2, w3, d1, d2, d3, a3 = filter_values
+            w1, w2, w3 = filter_values[:3]
+            d1, d2, d3 = map(int, map(round, filter_values[3:6]))
+            a3 = float(filter_values[6])
+            
             max_d = max(d1, d2, d3)
 
             filters = [
@@ -60,6 +63,7 @@ class EvaluationFunction:
         plt.title("Low and High Filters")
         plt.xlabel("Index")
         plt.ylabel("Filter Value")
+        plt.ylim(ymin=0)
         plt.grid()
         plt.legend()
         plt.show()
@@ -124,7 +128,7 @@ class EvaluationFunction:
 if __name__ == "__main__":
     daily = "data/BTC-Daily.csv"
 
-    evaluator = EvaluationFunction(daily, start_date="2017-01-01", end_date="2020-01-01")
+    evaluator = Evaluator(daily, start_date="2017-01-01", end_date="2019-12-31")
     evaluator.set_filters([1, 0, 1, 10, 0, 10, 0.5], [1, 0, 0, 20, 0, 0, 0])
     evaluator.plot_filters()
     
