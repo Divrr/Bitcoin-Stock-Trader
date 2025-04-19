@@ -124,7 +124,8 @@ class Evaluator:
         plt.xticks(rotation=45)
         plt.show()
 
-
+# Block comment with triple quotes (best for quick disabling)
+"""
 if __name__ == "__main__":
     daily = "data/BTC-Daily.csv"
 
@@ -137,3 +138,4 @@ if __name__ == "__main__":
     
     profit = evaluator.calculate_fitness()
     print(profit)
+"""
