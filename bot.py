@@ -124,7 +124,6 @@ class Evaluator:
         plt.xticks(rotation=45)
         plt.show()
 
-
 if __name__ == "__main__":
     daily = "data/BTC-Daily.csv"
 
