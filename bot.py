@@ -44,6 +44,8 @@ class Evaluator:
             w3 * np.pad(ema(d3, a3), (0, max_d - d3), 'constant')
             ]
 
+            if w1+w2+w3 == 0: return [0]*max_d
+
             return sum(filters) / (w1 + w2 + w3)
 
         self.low_filter = calculate_filter(low_filter)
