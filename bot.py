@@ -21,7 +21,7 @@ class Evaluator:
     def set_filters(self, low_filter, high_filter):
         def sma(N):
             weights = np.array([1 for k in range(N)])
-            return weights * N
+            return weights / N
 
         def lma(N):
             weights = np.array([1-k/N for k in range(N)])
