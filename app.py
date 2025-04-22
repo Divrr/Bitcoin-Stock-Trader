@@ -53,13 +53,13 @@ def run_and_display(n_clicks, selected_algo):
 
     try:
         if selected_algo == "IGWO":
-            plot_path = run_igwo()
+            plot_path, elapsed_time = run_igwo()
         else:
-            plot_path = run_aco()
+            plot_path, elapsed_time = run_aco()
 
         with open(plot_path, "rb") as img:
             encoded = base64.b64encode(img.read()).decode()
-        return f"✅ {selected_algo} optimization completed. Scroll down to see the trading signals.", f"data:image/png;base64,{encoded}"
+        return f"✅ {selected_algo} optimization completed in {elapsed_time:.2f} seconds.", f"data:image/png;base64,{encoded}"
 
     except Exception as e:
         return f"❌ Error running {selected_algo}: {str(e)}", ""
