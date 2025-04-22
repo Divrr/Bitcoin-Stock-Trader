@@ -8,12 +8,13 @@ mode="macd"  : 3-parameter (optional 4) MACD strategy
 Optimisers included:
     • PPSO  (Phasor Particle Swarm Optimisation)
     • HGSA  (Hybrid Genetic + Simulated Annealing)
-
-Synthetic data generator is left in place; swap with real CSV loader for production.
 """
+
 import numpy as np
 import random, math
 import matplotlib.pyplot as plt
+import pandas as pd
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # 1. Core moving-average helpers
@@ -244,50 +245,82 @@ class HGSA(Optimizer):
             temps = [t*0.95 for t in temps]       # cool
             print(f"HGSA iter {it+1}/{self.max_iter}  best={g_val:.2f}")
         return g_best
+    
+# ---------------------------------------------------------------------------
+# 7. REAL‑DATA LOADER  – works with BTC‑2021min.csv
+# ---------------------------------------------------------------------------
 
-# ---------------------------------------------------------------------------
-# 7. Demo data loader (replace with CSV)
-# ---------------------------------------------------------------------------
-def load_data():
-    t = np.linspace(0, 12*np.pi, 1200)
-    prices = 100 + 10*np.sin(t) + np.random.normal(0,2,len(t))
-    return prices.tolist()
+BASE_DIR   = Path(__file__).resolve().parent
+CSV_PATH   = BASE_DIR.parent / "data" / "BTC-2021min.csv"
+
+def load_data(csv_path: str | Path = CSV_PATH,
+              resample_rule: str | None = "D",
+              start: str | None = None,
+              end: str | None = None,
+              price_col: str = "close") -> list[float]:
+
+    csv_path = Path(csv_path)
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV file not found: {csv_path}")
+
+    # 1.  Read CSV  
+    df = (pd.read_csv(csv_path, parse_dates=["date"])
+            .rename(columns=str.lower)            # make all headers lower‑case
+            .sort_values("date")                  # oldest → newest
+            .set_index("date"))
+
+    # 2.  Optional slicing by date range
+    if start or end:
+        df = df.loc[start:end]
+
+    # 3. Resample to daily (or other)
+    if resample_rule:
+        df = df.resample(resample_rule).last()
+
+    # 4.  Forward‑fill any gaps (weekends, missing minutes, etc.)
+    df[price_col] = df[price_col].ffill()
+
+    # 5.  Sanity check
+    if df[price_col].isna().any():
+        raise ValueError("NaNs present in price series after ffill - check your data.")
+
+    return df[price_col].astype(float).tolist()
 
 # ---------------------------------------------------------------------------
 # 8.  Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    prices = load_data()
+    
+    # ► load daily‑bars between Jan‑2021 and Feb‑2022
+    daily_prices = load_data(CSV_PATH,
+                              resample_rule="D",
+                              start="2021-01-01",
+                              end="2022-02-28")
+    
+    print("Daily bars loaded :", len(daily_prices))
 
-    # -------- MACD mode demo --------------------------------------------
-    bot_macd = TradingBot(prices, mode="macd")
-    dim_macd = 3
-    bounds_macd = [(5,50), (20,200), (2,30)]      # short, long, signal
+    train = load_data(CSV_PATH, resample_rule="D", start="2021-01-01", end="2021-09-30")
+    test  = load_data(CSV_PATH, resample_rule="D", start="2021-10-01", end="2022-02-28")
 
-    pso = PPSO(pop_size=30, max_iter=60)
-    best_macd = pso.optimize(bot_macd, evaluation_function,
-                             dim_macd, bounds_macd)
-    print("\nBest MACD params:", best_macd)
-    print("Final cash:", evaluation_function(best_macd, bot_macd))
+    # --- Define MACD parameters ---
+    dim_macd = 3  # Number of parameters for MACD (short_span, long_span, signal_span)
+    bounds_macd = [
+        (5, 50),    # Bounds for short_span
+        (10, 200),  # Bounds for long_span
+        (2, 50)     # Bounds for signal_span
+    ]
+    
+    # --- Create PPSO instance ---
+    pso = PPSO(pop_size=40, max_iter=80) 
 
-    # -------- Blend mode demo -------------------------------------------
-    bot_blend = TradingBot(prices, mode="blend")
-    dim_blend = 14
-    # (w,w,w, d,d,d, α) ×2
-    b = []
-    b.extend([(0,100)]*3 + [(5,100)]*3 + [(0.05,0.95)])
-    b.extend([(0,100)]*3 + [(5,100)]*3 + [(0.05,0.95)])
-    bounds_blend = b
+    # --- optimise on the train slice ---
+    train_bot = TradingBot(train, mode="macd")
+    best_params = pso.optimize(train_bot, evaluation_function,
+                            dim_macd, bounds_macd)
 
-    ga = HGSA(pop_size=30, max_iter=60)
-    best_blend = ga.optimize(bot_blend, evaluation_function,
-                             dim_blend, bounds_blend)
-    print("\nBest BLEND params:", best_blend)
-    print("Final cash:", evaluation_function(best_blend, bot_blend))
-
-    # -------- Visual quick-look -----------------------------------------
-    plt.figure(figsize=(10,3))
-    plt.plot(prices)
-    plt.title("Synthetic price series"); plt.show()
+    # --- performance on unseen test slice ---
+    test_bot  = TradingBot(test, mode="macd")
+    oos_cash  = evaluation_function(best_params, test_bot)
+    print("Out-of-sample cash:", oos_cash)
 
 
