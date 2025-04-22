@@ -25,3 +25,6 @@ This script integrates the IGWO class with the EvaluationFunction trading bot. I
         Fitness Evaluation: Calculates profit using historical price data by simulating trades triggered by moving average crossovers.
         Parameter Optimization: 14-dimensional vector optimization (weights, durations, smoothing factors for both low and high filters).
 
+
+
+# pip install dash plotly pandas matplotlib

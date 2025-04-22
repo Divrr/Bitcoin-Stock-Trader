@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
+import matplotlib
+matplotlib.use("Agg")  # Use non-GUI backend for headless environments
 
 class Evaluator:
     def __init__(self, csv_source, transaction_cost=0.03, start_date=None, end_date=None, starting_budget=1000):
@@ -21,7 +23,7 @@ class Evaluator:
     def set_filters(self, low_filter, high_filter):
         def sma(N):
             weights = np.array([1 for k in range(N)])
-            return weights / N
+            return weights * N
 
         def lma(N):
             weights = np.array([1-k/N for k in range(N)])
@@ -104,25 +106,34 @@ class Evaluator:
         self.df['profit'] = cash_column
         
         return cash_column[-1]
-        
-    def plot_signals(self):
-        plt.figure(figsize=(12, 6))
 
+    def plot_signals(self, save_path=None):
+
+        plt.figure(figsize=(12, 6))
         plt.plot(self.df.index, self.df["close"], label="Close", linewidth=0.5)
         plt.plot(self.df.index, self.df["low"], label="Low", linestyle="--", alpha=0.5)
         plt.plot(self.df.index, self.df["high"], label="High", linestyle="--", alpha=0.5)
 
-        plt.scatter(self.df.index[self.df['buy_signal']], self.df['close'][self.df['buy_signal']] + 2000, label="Buy Signal", marker="^", color="green", alpha=0.7, s=10)
-        plt.scatter(self.df.index[self.df['sell_signal']], self.df['close'][self.df['sell_signal']] + 2000, label="Sell Signal", marker="v", color="red", alpha=0.7, s=10)
+        plt.scatter(self.df.index[self.df['buy_signal']], self.df['close'][self.df['buy_signal']] + 2000,
+                    label="Buy Signal", marker="^", color="green", alpha=0.7, s=10)
+        plt.scatter(self.df.index[self.df['sell_signal']], self.df['close'][self.df['sell_signal']] + 2000,
+                    label="Sell Signal", marker="v", color="red", alpha=0.7, s=10)
 
-        plt.title("Bitcoin Stock Trading Signals and Profit")
+        plt.title("Bitcoin Trading Signals and Filters")
         plt.xlabel("Date")
         plt.ylabel("Price")
         plt.legend(loc="upper left")
         plt.grid()
-
         plt.xticks(rotation=45)
-        plt.show()
+
+        if save_path:
+            plt.savefig(save_path)
+            print("✅ Plot saved to", save_path)
+        else:
+            plt.show()
+
+        plt.close()
+
 
 if __name__ == "__main__":
     daily = "data/BTC-Daily.csv"
