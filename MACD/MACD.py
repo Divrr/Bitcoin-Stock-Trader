@@ -250,12 +250,18 @@ class HGSA(Optimizer):
 # 7. REAL‑DATA LOADER  – works with BTC‑2021min.csv
 # ---------------------------------------------------------------------------
 
+BASE_DIR   = Path(__file__).resolve().parent
+CSV_PATH   = BASE_DIR.parent / "data" / "BTC-2021min.csv"
 
-def load_data(csv_path: str | Path = "data\BTC-2021min",
-              resample_rule: str | None = "H",
+def load_data(csv_path: str | Path = CSV_PATH,
+              resample_rule: str | None = "D",
               start: str | None = None,
               end: str | None = None,
               price_col: str = "close") -> list[float]:
+
+    csv_path = Path(csv_path)
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV file not found: {csv_path}")
 
     # 1.  Read CSV  
     df = (pd.read_csv(csv_path, parse_dates=["date"])
@@ -267,9 +273,7 @@ def load_data(csv_path: str | Path = "data\BTC-2021min",
     if start or end:
         df = df.loc[start:end]
 
-    # 3.  Resample if you don’t want to run a minute‑level bot
-    #     • 'H'  → hourly last close
-    #     • 'D'  → daily last close
+    # 3. Resample to daily (or other)
     if resample_rule:
         df = df.resample(resample_rule).last()
 
@@ -286,29 +290,37 @@ def load_data(csv_path: str | Path = "data\BTC-2021min",
 # 8.  Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    # ► 1) load ALL 2021 minute data, keep it minute‑level
-    minute_prices = load_data("BTC-2021min.csv", resample_rule=None)
     
-    # ► 2) load hour‑bars between Jan‑2021 and Feb‑2022
-    hourly_prices = load_data("BTC-2021min.csv",
-                              resample_rule="H",
+    # ► load daily‑bars between Jan‑2021 and Feb‑2022
+    daily_prices = load_data(CSV_PATH,
+                              resample_rule="D",
                               start="2021-01-01",
                               end="2022-02-28")
     
-    print("Minute bars loaded :", len(minute_prices))
-    print("Hourly bars loaded :", len(hourly_prices))
+    print("Daily bars loaded :", len(daily_prices))
 
-train = load_data("BTC-2021min.csv", resample_rule="H", start="2021-01-01", end="2021-09-30")
-test  = load_data("BTC-2021min.csv", resample_rule="H", start="2021-10-01", end="2022-02-28")
+    train = load_data(CSV_PATH, resample_rule="D", start="2021-01-01", end="2021-09-30")
+    test  = load_data(CSV_PATH, resample_rule="D", start="2021-10-01", end="2022-02-28")
 
-# --- optimise on the train slice ---
-train_bot = TradingBot(train, mode="macd")
-best_params = pso.optimize(train_bot, evaluation_function,
-                           dim_macd, bounds_macd)
+    # --- Define MACD parameters ---
+    dim_macd = 3  # Number of parameters for MACD (short_span, long_span, signal_span)
+    bounds_macd = [
+        (5, 50),    # Bounds for short_span
+        (10, 200),  # Bounds for long_span
+        (2, 50)     # Bounds for signal_span
+    ]
+    
+    # --- Create PPSO instance ---
+    pso = PPSO(pop_size=40, max_iter=80) 
 
-# --- performance on unseen test slice ---
-test_bot  = TradingBot(test, mode="macd")
-oos_cash  = evaluation_function(best_params, test_bot)
-print("Out-of-sample cash:", oos_cash)
+    # --- optimise on the train slice ---
+    train_bot = TradingBot(train, mode="macd")
+    best_params = pso.optimize(train_bot, evaluation_function,
+                            dim_macd, bounds_macd)
+
+    # --- performance on unseen test slice ---
+    test_bot  = TradingBot(test, mode="macd")
+    oos_cash  = evaluation_function(best_params, test_bot)
+    print("Out-of-sample cash:", oos_cash)
 
 
