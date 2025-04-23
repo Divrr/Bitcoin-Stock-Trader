@@ -12,7 +12,7 @@ class PPSO(Optimizer):
         theta = [random.uniform(0, 2*math.pi) for _ in range(self.pop_size)]
         return pop, theta
 
-    def optimize(self, bot, eval_fn):
+    def optimize(self, bot):
         pop, theta = self.initialize()
         g_best, g_val = pop[0], -float('inf')
 
@@ -30,7 +30,7 @@ class PPSO(Optimizer):
                     pop[i][d] += v[d]
                     pop[i][d] = max(self.bounds[d][0], min(pop[i][d], self.bounds[d][1]))
                 # evaluate
-                val = eval_fn(pop[i], bot)
+                val = bot.evaluate(pop[i])
                 if val > g_val:
                     g_best, g_val = pop[i][:], val
                 # phase angle drift

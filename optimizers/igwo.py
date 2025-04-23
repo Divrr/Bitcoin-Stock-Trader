@@ -30,7 +30,7 @@ class IGWO(Optimizer):
         mutation = best_pos + np.random.normal(0, 0.1, size=self.dim)
         return self.clip_agents(mutation)
 
-    def optimize(self, bot, eval_fn):
+    def optimize(self, bot):
 
         agents = self.initialize()
         alpha_pos, alpha_score = None, -float("inf")
@@ -39,7 +39,7 @@ class IGWO(Optimizer):
 
         for iter in range(self.max_iter):
             for i in range(self.pop_size):
-                fitness = eval_fn(agents[i], bot)
+                fitness =  bot.evaluate(agents[i])
 
                 if fitness > alpha_score:
                     delta_score, delta_pos = beta_score, beta_pos
@@ -84,7 +84,7 @@ class IGWO(Optimizer):
             if alpha_pos is not None:
                 alpha_pos = alpha_pos
                 mutated_alpha = self.gaussian_mutation(alpha_pos)
-                mutated_score = eval_fn(mutated_alpha, bot)
+                mutated_score =  bot.evaluate(mutated_alpha)
                 if mutated_score > alpha_score:
                     alpha_score = mutated_score
                     alpha_pos = mutated_alpha

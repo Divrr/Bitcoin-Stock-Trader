@@ -44,9 +44,6 @@ def compute_MACD(prices, short_span, long_span, signal_span):
     histogram  = macd_line - signal_line
     return macd_line, signal_line, histogram
 
-# ---------------------------------------------------------------------------
-# 2. Trading bot
-# ---------------------------------------------------------------------------
 class Evaluator:
     def __init__(self, prices, mode="blend"):
         """
@@ -63,6 +60,11 @@ class Evaluator:
         if self.mode == "macd" and len(params) not in (3, 4):
             raise ValueError("macd mode expects 3 or 4 parameters")
         self.params = params
+
+    # ---------------------------------------------------------------------
+    def evaluate(self, params):
+        self.update_parameters(params)
+        return self.simulate_trading()
 
     # ---------------------------------------------------------------------
     def simulate_trading(self):
@@ -135,10 +137,3 @@ class Evaluator:
         if btc > 0:
             cash = btc * self.prices[-1] * (1-fee)
         return cash
-
-# ---------------------------------------------------------------------------
-# 3.  Evaluation wrapper
-# ---------------------------------------------------------------------------
-def evaluation_function(params, bot):
-    bot.update_parameters(params)
-    return bot.simulate_trading()

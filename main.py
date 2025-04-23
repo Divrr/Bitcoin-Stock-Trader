@@ -1,7 +1,6 @@
 import pandas as pd
 from optimizers import PPSO, HGSA, IGWO, ACO
-from optimizers import Optimizer
-from evaluator import Evaluator, evaluation_function
+from evaluator import Evaluator
 
 def load_data(csv_path, start=None, end=None, price_col="close"):
     df = (pd.read_csv(csv_path, parse_dates=["date"])
@@ -40,8 +39,8 @@ def main():
     optimizers = [ACO(hyperparams), HGSA(hyperparams), IGWO(hyperparams), PPSO(hyperparams)]
     results = {}
     for optimizer in optimizers:
-        best_params = optimizer.optimize(train_bot, evaluation_function)
-        test_performance = evaluation_function(best_params, test_bot)
+        best_params = optimizer.optimize(train_bot)
+        test_performance = test_bot.evaluate(best_params)
         results[optimizer] = (best_params,test_performance)
 
     print("\n" + "=" * 50)
