@@ -20,33 +20,27 @@ def main():
     train_bot = Evaluator(train_data, mode="blend")
     test_bot = Evaluator(test_data, mode="blend")
 
-    params_config = {
+    hyperparams = {
         "dim": 14,
         "bounds": [
             # HIGH parameters (first 7)
-            (0, 1),
-            (0, 1),
-            (0, 1),
-            (5, 50),
-            (5, 50),
-            (5, 50),
+            (0, 1), (0, 1), (0, 1),
+            (5, 50), (5, 50), (5, 50),
             (0.1, 0.95),
 
             # LOW parameters (last 7)
-            (0, 1),
-            (0, 1),
-            (0, 1),
-            (5, 50),
-            (5, 50),
-            (5, 50),
+            (0, 1), (0, 1), (0, 1),
+            (5, 50), (5, 50), (5, 50),
             (0.1, 0.95),
-        ]
+        ],
+        "pop_size": 30,
+        "max_iter": 30,
     }
 
-    optimizers = [IGWO(pop_size=30, max_iter=30), HGSA(pop_size=30, max_iter=30)]
+    optimizers = [ACO(hyperparams), HGSA(hyperparams), IGWO(hyperparams), PPSO(hyperparams)]
     results = {}
     for optimizer in optimizers:
-        best_params = optimizer.optimize(train_bot, evaluation_function, params_config["dim"], params_config["bounds"])
+        best_params = optimizer.optimize(train_bot, evaluation_function)
         test_performance = evaluation_function(best_params, test_bot)
         results[optimizer] = (best_params,test_performance)
 

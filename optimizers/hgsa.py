@@ -3,15 +3,12 @@ import random
 import numpy as np
 
 class HGSA(Optimizer):
-    def __init__(self, pop_size=40, max_iter=80):
-        super().__init__(pop_size, max_iter)
+    def __init__(self, config):
+        super().__init__(config)
 
-    def initialize(self, dim, bounds):
-        return [[random.uniform(bounds[d][0], bounds[d][1])
-                 for d in range(dim)] for _ in range(self.pop_size)]
-
-    def optimize(self, bot, eval_fn, dim, bounds):
-        pop = self.initialize(dim, bounds)
+    def optimize(self, bot, eval_fn):
+        pop = [[random.uniform(self.bounds[d][0], self.bounds[d][1])
+                 for d in range(self.dim)] for _ in range(self.pop_size)]
         temps = [1.0]*self.pop_size
         g_best, g_val = pop[0], -float('inf')
 
@@ -25,21 +22,21 @@ class HGSA(Optimizer):
             new_pop = []
             while len(new_pop) < self.pop_size:
                 a, b = random.sample(pop, 2)
-                cut = random.randint(1, dim-1)
+                cut = random.randint(1, self.dim-1)
                 child = a[:cut] + b[cut:]
                 # mutation
-                for d in range(dim):
+                for d in range(self.dim):
                     if random.random() < 0.1:
-                        perturb = random.uniform(-1, 1)*(bounds[d][1]-bounds[d][0])*0.1
-                        child[d] = max(bounds[d][0], min(child[d]+perturb, bounds[d][1]))
+                        perturb = random.uniform(-1, 1)*(self.bounds[d][1]-self.bounds[d][0])*0.1
+                        child[d] = max(self.bounds[d][0], min(child[d]+perturb, self.bounds[d][1]))
                 new_pop.append(child)
             pop = new_pop
             # SA-style refinement
             for i in range(self.pop_size):
                 cand = pop[i][:]
-                for d in range(dim):
-                    cand[d] += np.random.normal(0, temps[i]) * (bounds[d][1]-bounds[d][0])*0.05
-                    cand[d] = max(bounds[d][0], min(cand[d], bounds[d][1]))
+                for d in range(self.dim):
+                    cand[d] += np.random.normal(0, temps[i]) * (self.bounds[d][1]-self.bounds[d][0])*0.05
+                    cand[d] = max(self.bounds[d][0], min(cand[d], self.bounds[d][1]))
                 if eval_fn(cand, bot) > eval_fn(pop[i], bot):
                     pop[i] = cand
             temps = [t*0.95 for t in temps]       # cool

@@ -2,9 +2,8 @@ from .base import Optimizer
 import numpy as np
 
 class ACO(Optimizer):
-    def __init__(self, pop_size=20, max_iter=50, evaporation_rate=0.5):
-        self.pop_size = pop_size
-        self.max_iter = max_iter
+    def __init__(self, config,  evaporation_rate=0.5):
+        super().__init__(config)
         self.evaporation_rate = evaporation_rate
         self.pheromones = np.ones(14)
 
@@ -30,8 +29,7 @@ class ACO(Optimizer):
         return low_params + high_params
 
 
-    def optimize(self, bot, eval_fn, dim, bounds):
-        self.bounds = bounds
+    def optimize(self, bot, eval_fn):
         best_fitness = -float('inf')
         best_params = None
 

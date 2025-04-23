@@ -3,17 +3,17 @@ import random
 import math
 
 class PPSO(Optimizer):
-    def __init__(self, pop_size=40, max_iter=80):
-        super().__init__(pop_size, max_iter)
+    def __init__(self, config):
+        super().__init__(config)
 
-    def initialize(self, dim, bounds):
-        pop   = [[random.uniform(bounds[d][0], bounds[d][1])
-                  for d in range(dim)] for _ in range(self.pop_size)]
+    def initialize(self):
+        pop   = [[random.uniform(self.bounds[d][0], self.bounds[d][1])
+                  for d in range(self.dim)] for _ in range(self.pop_size)]
         theta = [random.uniform(0, 2*math.pi) for _ in range(self.pop_size)]
         return pop, theta
 
-    def optimize(self, bot, eval_fn, dim, bounds):
-        pop, theta = self.initialize(dim, bounds)
+    def optimize(self, bot, eval_fn):
+        pop, theta = self.initialize()
         g_best, g_val = pop[0], -float('inf')
 
         for it in range(self.max_iter):
@@ -22,13 +22,13 @@ class PPSO(Optimizer):
                 c1 = abs(math.cos(theta[i]))**2 * math.sin(theta[i])
                 c2 = abs(math.sin(theta[i]))**2 * math.cos(theta[i])
                 r1, r2 = random.random(), random.random()
-                v = [0]*dim
+                v = [0]*self.dim
                 p_best = pop[i]                      # no personal best memory for simplicity
-                for d in range(dim):
+                for d in range(self.dim):
                     v[d] = (c1*r1*(p_best[d] - pop[i][d]) +
                             c2*r2*(g_best[d] - pop[i][d]))
                     pop[i][d] += v[d]
-                    pop[i][d] = max(bounds[d][0], min(pop[i][d], bounds[d][1]))
+                    pop[i][d] = max(self.bounds[d][0], min(pop[i][d], self.bounds[d][1]))
                 # evaluate
                 val = eval_fn(pop[i], bot)
                 if val > g_val:
