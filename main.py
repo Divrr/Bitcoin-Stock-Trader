@@ -1,5 +1,6 @@
 import pandas as pd
-from optimizers import PPSO, HGSA, Optimizer
+from optimizers import PPSO, HGSA, IGWO
+from optimizers import Optimizer
 from evaluator import Evaluator, evaluation_function
 
 def load_data(csv_path, start=None, end=None, price_col="close"):
@@ -10,16 +11,6 @@ def load_data(csv_path, start=None, end=None, price_col="close"):
     if start or end:
         df = df.loc[start:end]
     return df[price_col]
-
-def run_experiment(optimizer:Optimizer, trainer, tester, params_config):
-    best_params = optimizer.optimize(trainer, evaluation_function, params_config["dim"], params_config["bounds"])
-    test_performance = evaluation_function(best_params, tester)
-    
-    return {
-        "name": optimizer,
-        "best_params": best_params,
-        "test_performance": test_performance
-    }
 
 def main():
     CSV_PATH = "data/BTC-Daily.csv"
@@ -52,19 +43,22 @@ def main():
         ]
     }
 
-    optimizers = [PPSO(pop_size=100, max_iter=50), HGSA(pop_size=100, max_iter=50)]
-    results = []
-    for optimizer_class in optimizers:
-        result = run_experiment(optimizer_class, train_bot, test_bot, params_config)
-        results.append(result)
-    
-    print("\n" + "="*50)
+    optimizers = [IGWO(pop_size=30, max_iter=30), HGSA(pop_size=30, max_iter=30)]
+    results = {}
+    for optimizer in optimizers:
+        best_params = optimizer.optimize(train_bot, evaluation_function, params_config["dim"], params_config["bounds"])
+        test_performance = evaluation_function(best_params, test_bot)
+        results[optimizer] = (best_params,test_performance)
+
+    print("\n" + "=" * 50)
     print("FINAL RESULTS COMPARISON")
-    print("="*50)
-    for result in results:
-        print(f"\n{result['name']}:")
-        print(f"Best parameters found: {[round(p, 2) for p in result['best_params']]}")
-        print(f"Test performance: {result['test_performance']:.2f}")
+    print("=" * 50)
+    for optimizer, (best_params, test_performance) in results.items():
+        optimizer_name = optimizer.__class__.__name__
+        rounded_params = [round(p, 2) for p in best_params]
+        print(f"\n{optimizer_name}:")
+        print(f"Best parameters found: {rounded_params}")
+        print(f"Test performance: {test_performance:.2f}")
 
 if __name__ == "__main__":
     main()
