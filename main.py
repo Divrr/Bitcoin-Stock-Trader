@@ -1,5 +1,5 @@
 import pandas as pd
-from optimizers import PPSO, HGSA, IGWO
+from optimizers import PPSO, HGSA, IGWO, ACO
 from optimizers import Optimizer
 from evaluator import Evaluator, evaluation_function
 
