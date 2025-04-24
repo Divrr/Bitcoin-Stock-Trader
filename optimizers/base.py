@@ -8,7 +8,7 @@ class Optimizer(ABC):
         self.bounds = config["bounds"]
 
     @abstractmethod
-    def optimize(self, bot, eval_fn, dim, bounds):
+    def optimize(self, bot):
         pass
 
     def __str__(self):

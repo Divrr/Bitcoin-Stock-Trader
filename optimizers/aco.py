@@ -29,7 +29,7 @@ class ACO(Optimizer):
         return low_params + high_params
 
 
-    def optimize(self, bot, eval_fn):
+    def optimize(self, bot):
         best_fitness = -float('inf')
         best_params = None
 
@@ -39,7 +39,7 @@ class ACO(Optimizer):
 
             for ant in range(self.pop_size):
                 params = self.sample_parameters()
-                fitness = bot.evaluate(params, bot)
+                fitness = bot.evaluate(params)
 
                 all_params.append(params)
                 all_scores.append(fitness)

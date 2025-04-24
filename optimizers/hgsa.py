@@ -13,7 +13,7 @@ class HGSA(Optimizer):
         g_best, g_val = pop[0], -float('inf')
 
         for it in range(self.max_iter):
-            scores = [bot.evaluate(ind, bot) for ind in pop]
+            scores = [bot.evaluate(ind) for ind in pop]
             # update global best
             for ind, sc in zip(pop, scores):
                 if sc > g_val:
@@ -37,7 +37,7 @@ class HGSA(Optimizer):
                 for d in range(self.dim):
                     cand[d] += np.random.normal(0, temps[i]) * (self.bounds[d][1]-self.bounds[d][0])*0.05
                     cand[d] = max(self.bounds[d][0], min(cand[d], self.bounds[d][1]))
-                if bot.evaluate(cand, bot) > bot.evaluate(pop[i], bot):
+                if bot.evaluate(cand) > bot.evaluate(pop[i]):
                     pop[i] = cand
             temps = [t*0.95 for t in temps]       # cool
             print(f"HGSA iter {it+1}/{self.max_iter}  best={g_val:.2f}")
