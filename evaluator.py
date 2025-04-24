@@ -10,37 +10,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# ---------------------------------------------------------------------------
-# 1. WMA helpers
-# ---------------------------------------------------------------------------
-def compute_SMA(prices, window):
-    if window < 1: raise ValueError("window must be ≥1")
-    sma = np.convolve(prices, np.ones(window) / window, mode="same")
-    sma[:window-1] = sma[window-1]          # pad left side
-    return sma
+def sma_kernel(N):
+    weights = np.array([1 for k in range(N)])
+    return weights / N
 
-def compute_LMA(prices, window):
-    if window < 1: raise ValueError("window must be ≥1")
-    w = np.arange(1, window + 1)
-    w = (w / w.sum())[::-1]                 # recent weight highest
-    lma = np.convolve(prices, w, mode="same")
-    lma[:window-1] = lma[window-1]
-    return lma
+def lma_kernel(N):
+    weights = np.array([1-k/N for k in range(N)])
+    return weights * (2/(N+1))
 
-def compute_EMA_full(prices, span):
-    alpha = 2.0 / (span + 1.0)
-    ema = np.zeros_like(prices, dtype=float)
-    ema[span-1] = np.mean(prices[:span])
-    ema[:span-1] = ema[span-1]              # fill warm-up
-    for i in range(span, len(prices)):
-        ema[i] = alpha * prices[i] + (1 - alpha) * ema[i-1]
-    return ema
+def ema_kernel(N, alpha):
+    weights = np.array([(1 - alpha) ** k for k in range(N)])
+    return weights * alpha
+
+def wma(P, kernel):
+    padding = -P[:len(kernel) - 1][::-1]
+    P = np.concatenate((padding, P))
+    return np.convolve(P, kernel, "valid")
 
 def compute_MACD(prices, short_span, long_span, signal_span):
-    ema_short  = compute_EMA_full(prices, short_span)
-    ema_long   = compute_EMA_full(prices, long_span)
+    ema_short  = wma(prices, ema_kernel(short_span))
+    ema_long   = wma(prices, ema_kernel(long_span))
     macd_line  = ema_short - ema_long
-    signal_line = compute_EMA_full(macd_line, signal_span)
+    signal_line = wma(macd_line, ema_kernel(signal_span))
     histogram  = macd_line - signal_line
     return macd_line, signal_line, histogram
 
@@ -87,13 +78,13 @@ class Evaluator:
         d1h, d2h, d3h = [max(5, int(round(x))) for x in (d1h, d2h, d3h)]
         d1l, d2l, d3l = [max(5, int(round(x))) for x in (d1l, d2l, d3l)]
 
-        sma_h = compute_SMA(self.prices, d1h)
-        lma_h = compute_LMA(self.prices, d2h)
-        ema_h = compute_EMA_full(self.prices, d3h) * ah + 0  # scale later
+        sma_h = wma(self.prices, sma_kernel(d1h))
+        lma_h = wma(self.prices, lma_kernel(d2h))
+        ema_h = wma(self.prices, ema_kernel(d3h, ah))
 
-        sma_l = compute_SMA(self.prices, d1l)
-        lma_l = compute_LMA(self.prices, d2l)
-        ema_l = compute_EMA_full(self.prices, d3l) * al + 0
+        sma_l = wma(self.prices, sma_kernel(d1l))
+        lma_l = wma(self.prices, lma_kernel(d2l))
+        ema_l = wma(self.prices, ema_kernel(d3l, al))
 
         high = (w1h*sma_h + w2h*lma_h + w3h*ema_h) / (w1h+w2h+w3h+1e-6)
         low  = (w1l*sma_l + w2l*lma_l + w3l*ema_l) / (w1l+w2l+w3l+1e-6)
