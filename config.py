@@ -11,13 +11,15 @@ COMMON_CFG = {
     ],
     # population + iterations
     "pop_size": 30,
-    "max_iter": 100,      # hard cap (can’t be None)
 
     # ---- optional early‑stopping knobs (None ⇒ ignored) ----
-    "max_time" : 120,     # seconds   (e.g. None to ignore)
-    "max_calls": None,    # evaluations
-    "patience" : 10,      # stagnation window length
-    "min_delta": 1.0      # €/USD improvement regarded as progress
+    # NOTE: make sure to set at least one of these to a non-None value, else the algorithms will run forever
+
+    "max_iter": 30,          # iterations 
+    "max_time" : None,       # seconds   
+    "max_calls": None,       # evaluations
+    "patience" : None,       # stagnation window length
+    "min_delta": None        # € improvement regarded as progress
 }
 
 DATA_CFG = {

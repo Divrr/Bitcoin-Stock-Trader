@@ -1,6 +1,7 @@
 from .base import Optimizer
 import random
 import numpy as np
+import time
 
 class HGSA(Optimizer):
     def __init__(self, config):
@@ -12,7 +13,11 @@ class HGSA(Optimizer):
         temps = [1.0]*self.pop_size
         g_best, g_val = pop[0], -float('inf')
 
-        for it in range(self.max_iter):
+        start_time = time.time()          # for the max_time check  
+        calls0     = bot.eval_count      # so we can count only the new evals  
+        best_hist  = []                  # “history” of the best fitness at each iteration  
+
+        for it in self._iter_loop():
             scores = [bot.evaluate(ind) for ind in pop]
             # update global best
             for ind, sc in zip(pop, scores):
@@ -41,6 +46,15 @@ class HGSA(Optimizer):
                     pop[i] = cand
             temps = [t*0.95 for t in temps]       # cool
             print(f"HGSA iter {it+1}/{self.max_iter}  best={g_val:.2f}")
+
+            # *****************************************************************************************
+            # *                               record & check early-stop                               *
+            # *****************************************************************************************
+            best_hist.append(g_val)
+            calls_made = bot.eval_count - calls0
+            if self._should_stop(start_time, calls_made, best_hist):
+                break
+
         return g_best
     
     def __str__(self):
