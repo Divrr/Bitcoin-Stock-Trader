@@ -88,7 +88,3 @@ def main():
             py_params = list(params)
         rounded = [round(p, 2) for p in py_params]
         print(f"{name}: {rounded}\n")
-
-
-if __name__ == "__main__":
-    main()
