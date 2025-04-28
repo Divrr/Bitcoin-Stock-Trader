@@ -11,6 +11,7 @@ class IGWO(Optimizer):
         super().__init__(config)
         self.lb = np.array([b[0] for b in self.bounds])
         self.ub = np.array([b[1] for b in self.bounds])
+        self.convergence_curve = []
 
     def initialize(self):
         x = np.zeros((self.pop_size, self.dim))
@@ -103,5 +104,6 @@ class IGWO(Optimizer):
                     no_improve = 0
 
             print(f"IGWO iter {iter + 1}/{self.max_iter} best={alpha_score:.2f}")
+            self.convergence_curve.append(alpha_score)
 
         return alpha_pos

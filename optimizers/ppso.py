@@ -5,6 +5,7 @@ import math
 class PPSO(Optimizer):
     def __init__(self, config):
         super().__init__(config)
+        self.convergence_curve = []
 
     def initialize(self):
         pop   = [[random.uniform(self.bounds[d][0], self.bounds[d][1])
@@ -36,6 +37,7 @@ class PPSO(Optimizer):
                 # phase angle drift
                 theta[i] = (theta[i] + random.uniform(0, 2*math.pi)) % (2*math.pi)
             print(f"PPSO iter {it+1}/{self.max_iter}  best={g_val:.2f}")
+            self.convergence_curve.append(g_val)
         return g_best
     
     def __str__(self):
