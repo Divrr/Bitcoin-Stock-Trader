@@ -22,8 +22,6 @@ class ACO(Optimizer):
             int_indices = [3,4,5,10,11,12,17,18,19]
         elif dim == 2:
             int_indices = [0,1]
-        elif dim == 3 or dim == 4:  
-            int_indices = [0, 1, 2]
         for i, (low, high) in enumerate(self.bounds):
             value = np.random.uniform(low, high)
             if i in int_indices:
@@ -45,7 +43,7 @@ class ACO(Optimizer):
             all_params = []
             all_scores = []
 
-            for _ in range(self.pop_size):
+            for ant in range(self.pop_size):
                 params = self.sample_parameters()
                 fitness = bot.evaluate(params)
 

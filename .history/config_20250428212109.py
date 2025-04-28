@@ -8,7 +8,7 @@ DATA_CFG = {
     "train_end"  : "2019-12-31",
     "test_start" : "2019-12-31",
     "test_end"   : "2022-01-01",
-    "mode": "macd",   # # Supports "blend" (14 dimensions), "2d_sma" (2 dimensions), "21d_macd" (21 dimensions), "macd" (3 dimensions)
+    "mode": "macd",   # 支持 "blend"（14维）, "2d_sma"（2维）, "21d_macd"（21维）
 }
 
 def get_search_space(mode):
@@ -18,9 +18,9 @@ def get_search_space(mode):
             (0,1),(0,1),(0,1),(5,50),(5,50),(5,50),(0.1,0.95)
         ]
     elif mode == "macd":
-        # Standard MACD, three adjustable windows (optional with threshold)
+        # 标准MACD，三个窗口可调（可选加阈值）
         bounds = [(5, 30), (10, 60), (3, 30)]   # [short, long, signal]
-        # If you want 4 dimensions (including threshold), add a histogram threshold range
+        # 如果你要4维（含阈值），加一个直方图阈值范围
         # bounds = [(5, 30), (10, 60), (3, 30), (-20, 20)]
     elif mode == "2d_sma":
         bounds = [(5, 50), (10, 100)]

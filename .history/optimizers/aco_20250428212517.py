@@ -45,7 +45,7 @@ class ACO(Optimizer):
             all_params = []
             all_scores = []
 
-            for _ in range(self.pop_size):
+            for ant in range(self.pop_size):
                 params = self.sample_parameters()
                 fitness = bot.evaluate(params)
 
