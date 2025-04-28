@@ -13,6 +13,7 @@ class IGWO(Optimizer):
         super().__init__(config)
         self.lb = np.array([b[0] for b in self.bounds])
         self.ub = np.array([b[1] for b in self.bounds])
+        self.convergence_curve = []
 
     def initialize(self):
         x = np.zeros((self.pop_size, self.dim))
@@ -23,7 +24,7 @@ class IGWO(Optimizer):
                     x[i][j] = x[i-1][j] / 0.7
                 else:
                     x[i][j] = (1 - x[i-1][j]) / 0.3
-        return self.lb + x * (self.ub - self.lb)
+        return np.random.uniform(self.lb, self.ub, (self.pop_size, self.dim))  # Standard Random Initialization
 
     def clip_agents(self, agents):
         return np.clip(agents, self.lb, self.ub)
@@ -33,11 +34,13 @@ class IGWO(Optimizer):
         return self.clip_agents(mutation)
 
     def optimize(self, bot):
-
         agents = self.initialize()
         alpha_pos, alpha_score = None, -float("inf")
         beta_pos, beta_score = None, -float("inf")
         delta_pos, delta_score = None, -float("inf")
+        
+        prev_alpha_score = -float("inf") 
+        no_improve = 0
 
         start_time = time.time()          # for the max_time check  
         calls0     = bot.eval_count      # so we can count only the new evals  
@@ -47,7 +50,7 @@ class IGWO(Optimizer):
 
         for iter in self._iter_loop():
             for i in range(self.pop_size):
-                fitness =  bot.evaluate(agents[i])
+                fitness = bot.evaluate(agents[i])
 
                 if fitness > alpha_score:
                     delta_score, delta_pos = beta_score, beta_pos
@@ -70,7 +73,7 @@ class IGWO(Optimizer):
             print(f"denom={denom}")
             a = 2 * np.cos((iter/int(denom)) * (np.pi / 2))
 
-            # Ensure leaders are initialized before attempting update
+            # Position update
             if alpha_pos is not None and beta_pos is not None and delta_pos is not None:
                 for i in range(self.pop_size):
                     for j in range(self.dim):
@@ -94,18 +97,19 @@ class IGWO(Optimizer):
 
                         agents[i][j] = (X1 + X2 + X3) / 3
 
-
             agents = self.clip_agents(agents)
 
             if alpha_pos is not None:
-                alpha_pos = alpha_pos
                 mutated_alpha = self.gaussian_mutation(alpha_pos)
-                mutated_score =  bot.evaluate(mutated_alpha)
+                mutated_score = bot.evaluate(mutated_alpha)
                 if mutated_score > alpha_score:
                     alpha_score = mutated_score
                     alpha_pos = mutated_alpha
 
+                
+
             print(f"IGWO iter {iter + 1}/{self.max_iter} best={alpha_score:.2f}")
+            self.convergence_curve.append(alpha_score)
 
 
             # record & check early-stop

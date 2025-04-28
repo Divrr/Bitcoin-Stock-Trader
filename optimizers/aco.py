@@ -7,6 +7,8 @@ class ACO(Optimizer):
         super().__init__(config)
         self.evaporation_rate = evaporation_rate
         self.pheromones = np.ones(14)
+        self.convergence_curve = []
+
 
     def sample_parameters(self):
         # Low filter: Fast
@@ -61,6 +63,8 @@ class ACO(Optimizer):
             for i in range(14):
                 self.pheromones[i] += all_scores[best_idx] / 1000.0  # Rewarding better parameters
             print(f"ACO iter {it+1}/{self.max_iter}, best={best_fitness:.2f}")
+            self.convergence_curve.append(best_fitness)
+
             
 
             # *****************************************************************************************

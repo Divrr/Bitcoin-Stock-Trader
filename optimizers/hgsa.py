@@ -6,6 +6,7 @@ import time
 class HGSA(Optimizer):
     def __init__(self, config):
         super().__init__(config)
+        self.convergence_curve = []
 
     def optimize(self, bot):
         pop = [[random.uniform(self.bounds[d][0], self.bounds[d][1])
@@ -46,6 +47,8 @@ class HGSA(Optimizer):
                     pop[i] = cand
             temps = [t*0.95 for t in temps]       # cool
             print(f"HGSA iter {it+1}/{self.max_iter}  best={g_val:.2f}")
+            self.convergence_curve.append(g_val)
+
 
             # *****************************************************************************************
             # *                               record & check early-stop                               *
