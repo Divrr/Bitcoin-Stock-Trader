@@ -1,58 +1,98 @@
-import pandas as pd
+import pandas as pd, psutil, os, time
 from optimizers import PPSO, HGSA, IGWO, ACO
-from evaluator import Evaluator
+from evaluator  import Evaluator
+import config  # <- new central settings file
 
-def load_data(csv_path, start=None, end=None, price_col="close"):
-    df = (pd.read_csv(csv_path, parse_dates=["date"])
-            .rename(columns=str.lower)
-            .set_index("date")
-            .sort_index())
+# -------------------------------------------------- data helper ----------
+
+def load_data(path, start=None, end=None, col="close"):
+    df = (pd.read_csv(path, parse_dates=["date"]).rename(columns=str.lower)
+            .set_index("date").sort_index())
     if start or end:
         df = df.loc[start:end]
-    return df[price_col]
+    return df[col]
+
+# -------------------------------------------------- main ---------------
 
 def main():
-    CSV_PATH = "data/BTC-Daily.csv"
-    
-    train_data = load_data(CSV_PATH, start="2017-01-01", end="2019-12-31")
-    test_data = load_data(CSV_PATH, start="2019-12-31", end="2022-01-01")
-    train_bot = Evaluator(train_data, mode="blend")
-    test_bot = Evaluator(test_data, mode="blend")
+    # ---- data ---------------------------------------------------------
+    d = config.DATA_CFG
+    train = load_data(d["csv_path"], d["train_start"], d["train_end"])
+    test  = load_data(d["csv_path"], d["test_start"],  d["test_end"])
 
-    hyperparams = {
-        "dim": 14,
-        "bounds": [
-            # HIGH parameters (first 7)
-            (0, 1), (0, 1), (0, 1),
-            (5, 50), (5, 50), (5, 50),
-            (0.1, 0.95),
+    train_bot = Evaluator(train, mode="blend")
+    test_bot  = Evaluator(test,  mode="blend")
 
-            # LOW parameters (last 7)
-            (0, 1), (0, 1), (0, 1),
-            (5, 50), (5, 50), (5, 50),
-            (0.1, 0.95),
-        ],
-        "pop_size": 30,
-        "max_iter": 30,
-    }
+    # ---- set up optimisers -------------------------------------------
+    optimisers = [ACO(config.COMMON_CFG), HGSA(config.COMMON_CFG),
+                  IGWO(config.COMMON_CFG), PPSO(config.COMMON_CFG)]
 
-    optimizers = [ACO(hyperparams), HGSA(hyperparams), IGWO(hyperparams), PPSO(hyperparams)]
-    results = {}
-    for optimizer in optimizers:
-        best_params = optimizer.optimize(train_bot)
-        test_performance = test_bot.evaluate(best_params)
-        results[optimizer] = (best_params,test_performance)
+    summary = []
+    best_parameters = {}
 
-    print("\n" + "=" * 50)
+    for opt in optimisers:
+
+        print("\n" + "=" * 75)
+        print(f"RUNNING: {opt.__class__.__name__} OPTIMIZER")
+        print("-" * 75 )
+
+        # reset counters
+        train_bot.eval_count = train_bot.eval_time = 0
+
+        # mem usage before
+        proc = psutil.Process(os.getpid())
+        mem0 = proc.memory_info().rss/1e6
+
+        # start time
+        t0 = time.time()
+
+        # run the optimizer
+        best_params = opt.optimize(train_bot)
+
+        # end time
+        wall_time_s = time.time() - t0
+        # mem usage after
+        mem1 = proc.memory_info().rss/1e6
+
+        # compute evaluation metrics
+        calls = train_bot.eval_count
+        avg_eval_ms   = (train_bot.eval_time/calls)*1e3 if calls else 0
+
+        # final test-set evaluation (single call)
+        test_fitness = test_bot.evaluate(best_params)
+
+        # we save the best parameters for each optimizer
+        best_parameters[opt.__class__.__name__] = best_params
+
+
+        summary.append({
+            "Optimizer": opt.__class__.__name__,
+            "Test$": round(test_fitness,2),
+            "Fitness Calls": calls,
+            "Total(s)": round(wall_time_s,2),
+            "Avg Eval (ms)": round(avg_eval_ms,2),
+            "Mem(MB)": round(max(mem0,mem1),1)
+        })
+
+    print("\n" + "=" * 75)
     print("FINAL RESULTS COMPARISON")
-    print("=" * 50)
-    for optimizer, (best_params, test_performance) in results.items():
-        optimizer_name = optimizer.__class__.__name__
-        rounded_params = [round(p, 2) for p in best_params]
-        print(f"\n{optimizer_name}:")
-        print(f"Best parameters found: {rounded_params}")
-        print(f"Test performance: {test_performance:.2f}")
+    print("=" * 75)
+    # display consolidated results table
+    df_summary = pd.DataFrame(summary)
+    print(df_summary.to_string(index=False))
+
+    # we print the best parameters for each optimizer
+    print("\n" + "=" * 75)
+    print("BEST PARAMETERS FOR EACH OPTIMIZER")
+    print("=" * 75)
+    for name, params in best_parameters.items():
+        # if it is a numpy array, convert it to a list
+        if hasattr(params, 'tolist'):
+            py_params = params.tolist()
+        else:
+            py_params = list(params)
+        rounded = [round(p, 2) for p in py_params]
+        print(f"{name}: {rounded}\n")
 
 if __name__ == "__main__":
     main()
-

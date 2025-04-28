@@ -5,6 +5,8 @@ Date: April 2025
 
 from .base import Optimizer
 import numpy as np
+import math
+import time
 
 class IGWO(Optimizer):
     def __init__(self, config):
@@ -36,11 +38,17 @@ class IGWO(Optimizer):
         alpha_pos, alpha_score = None, -float("inf")
         beta_pos, beta_score = None, -float("inf")
         delta_pos, delta_score = None, -float("inf")
-
-        prev_alpha_score = -float("inf")
+        
+        prev_alpha_score = -float("inf") 
         no_improve = 0
 
-        for iter in range(self.max_iter):
+        start_time = time.time()          # for the max_time check  
+        calls0     = bot.eval_count      # so we can count only the new evals  
+        best_hist  = []                  # “history” of the best fitness at each iteration  
+
+
+
+        for iter in self._iter_loop():
             for i in range(self.pop_size):
                 fitness = bot.evaluate(agents[i])
 
@@ -55,7 +63,15 @@ class IGWO(Optimizer):
                     delta_score, delta_pos = fitness, agents[i].copy()
 
             # Cosine adaptive control factor
-            a = 2 * np.cos((iter / self.max_iter) * (np.pi / 2))
+            # a = 2 * np.cos((iter / self.max_iter) * (np.pi / 2))
+
+            # denominator for the cosine schedule
+            # if self.max_iter is not None, then denom = self.max_iter, else denom = iter + 1, i.e, 
+            # denom now grows with the iteration counter when the run is “infinite”, the coefficient a still decreases smoothly toward 0, 
+            # so the grey-wolf step size shrinks just as in the standard algorithm.
+            denom = self.max_iter if self.max_iter is not None else (iter + 1)
+            print(f"denom={denom}")
+            a = 2 * np.cos((iter/int(denom)) * (np.pi / 2))
 
             # Position update
             if alpha_pos is not None and beta_pos is not None and delta_pos is not None:
@@ -105,5 +121,12 @@ class IGWO(Optimizer):
 
             print(f"IGWO iter {iter + 1}/{self.max_iter} best={alpha_score:.2f}")
             self.convergence_curve.append(alpha_score)
+
+
+            # record & check early-stop
+            best_hist.append(alpha_score)
+            calls_made = bot.eval_count - calls0
+            if self._should_stop(start_time, calls_made, best_hist):
+                break
 
         return alpha_pos

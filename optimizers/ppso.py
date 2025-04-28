@@ -1,6 +1,7 @@
 from .base import Optimizer
 import random
 import math
+import time
 
 class PPSO(Optimizer):
     def __init__(self, config):
@@ -17,7 +18,12 @@ class PPSO(Optimizer):
         pop, theta = self.initialize()
         g_best, g_val = pop[0], -float('inf')
 
-        for it in range(self.max_iter):
+        start_time = time.time()          # for the max_time check  
+        calls0     = bot.eval_count      # so we can count only the new evals  
+        best_hist  = []                  # “history” of the best fitness at each iteration  
+
+
+        for it in self._iter_loop():
             for i in range(self.pop_size):
                 # --- PPSO velocity update (phasor rule) ---
                 c1 = abs(math.cos(theta[i]))**2 * math.sin(theta[i])
@@ -38,6 +44,15 @@ class PPSO(Optimizer):
                 theta[i] = (theta[i] + random.uniform(0, 2*math.pi)) % (2*math.pi)
             print(f"PPSO iter {it+1}/{self.max_iter}  best={g_val:.2f}")
             self.convergence_curve.append(g_val)
+
+            # *****************************************************************************************
+            # *                               record & check early-stop                               *
+            # *****************************************************************************************
+            best_hist.append(g_val)
+            calls_made = bot.eval_count - calls0
+            if self._should_stop(start_time, calls_made, best_hist):
+                break
+
         return g_best
     
     def __str__(self):

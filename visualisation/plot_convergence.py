@@ -6,20 +6,15 @@ import matplotlib.pyplot as plt
 from optimizers import IGWO, ACO, HGSA, PPSO
 from evaluator import Evaluator
 from main import load_data
+from config import COMMON_CFG, DATA_CFG
 
 def main():
-    CSV_PATH = "data/BTC-Daily.csv"
-    train_data = load_data(CSV_PATH, start="2017-01-01", end="2019-12-31")
+    train_data = load_data(DATA_CFG["csv_path"],
+                           start=DATA_CFG["train_start"],
+                           end=DATA_CFG["train_end"])
     bot = Evaluator(train_data, mode="blend")
 
-    config = {
-        "dim": 14,
-        "bounds": [(0,1)]*3 + [(5,50)]*3 + [(0.1,0.95)] + [(0,1)]*3 + [(5,50)]*3 + [(0.1,0.95)],
-        "pop_size": 30,
-        "max_iter": 30
-    }
-
-    optimizers = [ACO(config), HGSA(config), IGWO(config), PPSO(config)]
+    optimizers = [ACO(COMMON_CFG), HGSA(COMMON_CFG), IGWO(COMMON_CFG), PPSO(COMMON_CFG)]
     results = {}
 
     for optimizer in optimizers:

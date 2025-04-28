@@ -1,5 +1,6 @@
 from .base import Optimizer
 import numpy as np
+import time
 
 class ACO(Optimizer):
     def __init__(self, config,  evaporation_rate=0.5):
@@ -35,7 +36,12 @@ class ACO(Optimizer):
         best_fitness = -float('inf')
         best_params = None
 
-        for it in range(self.max_iter):
+        start_time = time.time()          # for the max_time check  
+        calls0     = bot.eval_count      # so we can count only the new evals  
+        best_hist  = []                  # “history” of the best fitness at each iteration  
+
+
+        for it in self._iter_loop():
             all_params = []
             all_scores = []
 
@@ -58,5 +64,15 @@ class ACO(Optimizer):
                 self.pheromones[i] += all_scores[best_idx] / 1000.0  # Rewarding better parameters
             print(f"ACO iter {it+1}/{self.max_iter}, best={best_fitness:.2f}")
             self.convergence_curve.append(best_fitness)
+
+            
+
+            # *****************************************************************************************
+            # *                               record & check early-stop                               *
+            # *****************************************************************************************
+            best_hist.append(best_fitness)
+            calls_made = bot.eval_count - calls0
+            if self._should_stop(start_time, calls_made, best_hist):
+                break
 
         return best_params
