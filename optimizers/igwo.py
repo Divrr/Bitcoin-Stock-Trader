@@ -106,18 +106,7 @@ class IGWO(Optimizer):
                     alpha_score = mutated_score
                     alpha_pos = mutated_alpha
 
-                # === Alpha stagnation reset logic ===
-                if alpha_score == prev_alpha_score:
-                    no_improve += 1
-                else:
-                    no_improve = 0
-                prev_alpha_score = alpha_score
-
-                if no_improve >= 10:
-                    print(f"Replacing alpha due to stagnation (no improvement in 10 iterations)")
-                    alpha_pos = np.random.uniform(self.lb, self.ub)
-                    alpha_score = bot.evaluate(alpha_pos)
-                    no_improve = 0
+                
 
             print(f"IGWO iter {iter + 1}/{self.max_iter} best={alpha_score:.2f}")
             self.convergence_curve.append(alpha_score)
