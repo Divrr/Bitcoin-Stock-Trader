@@ -25,8 +25,8 @@ class CCS(Optimizer):
                     best_point = self.current[:]
 
             self.convergence_curve.append(best_val)
-            print(f"Cyclic iter {it+1}/{self.max_iter}  best={best_val:.2f}")
-            
+            print(f"CCS iter {it+1}/{self.max_iter}  best={best_val:.2f}")
+
             history.append(best_val)
             calls_made = bot.eval_count - calls0
             if self._should_stop(start_time, calls_made, history):
