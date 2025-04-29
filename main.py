@@ -1,5 +1,5 @@
 import pandas as pd, psutil, os, time
-from optimizers import PPSO, HGSA, IGWO, ACO
+from optimizers import PPSO, HGSA, IGWO, ACO, CCS
 from evaluator  import Evaluator
 import config  # <- new central settings file
 
@@ -27,7 +27,8 @@ def main():
 
     # ---- set up optimisers -------------------------------------------
     optimisers = [ACO(config.COMMON_CFG), HGSA(config.COMMON_CFG),
-                  IGWO(config.COMMON_CFG), PPSO(config.COMMON_CFG)]
+                  IGWO(config.COMMON_CFG), PPSO(config.COMMON_CFG),
+                  CCS(config.COMMON_CFG)]
 
     summary = []
     best_parameters = {}
