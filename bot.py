@@ -21,7 +21,7 @@ class Evaluator:
     def set_filters(self, low_filter, high_filter):
         def sma(N):
             weights = np.array([1 for k in range(N)])
-            return weights * N
+            return weights / N
 
         def lma(N):
             weights = np.array([1-k/N for k in range(N)])
@@ -126,8 +126,6 @@ class Evaluator:
         plt.xticks(rotation=45)
         plt.show()
 
-# Block comment with triple quotes (best for quick disabling)
-"""
 if __name__ == "__main__":
     daily = "data/BTC-Daily.csv"
 
@@ -140,4 +138,3 @@ if __name__ == "__main__":
     
     profit = evaluator.calculate_fitness()
     print(profit)
-"""
