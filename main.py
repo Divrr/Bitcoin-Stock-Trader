@@ -1,5 +1,5 @@
 import pandas as pd, psutil, os, time
-from optimizers import PPSO, HGSA, IGWO, ACO
+from optimizers import PPSO, HGSA, IGWO, ACO, CCS
 from evaluator  import Evaluator
 import config  # <- new central settings file
 
@@ -20,12 +20,15 @@ def main():
     train = load_data(d["csv_path"], d["train_start"], d["train_end"])
     test  = load_data(d["csv_path"], d["test_start"],  d["test_end"])
 
-    train_bot = Evaluator(train, mode="blend")
-    test_bot  = Evaluator(test,  mode="blend")
+    mode = d.get("mode", "blend")
+
+    train_bot = Evaluator(train, mode=mode)
+    test_bot  = Evaluator(test,  mode=mode)
 
     # ---- set up optimisers -------------------------------------------
     optimisers = [ACO(config.COMMON_CFG), HGSA(config.COMMON_CFG),
-                  IGWO(config.COMMON_CFG), PPSO(config.COMMON_CFG)]
+                  IGWO(config.COMMON_CFG), PPSO(config.COMMON_CFG),
+                  CCS(config.COMMON_CFG)]
 
     summary = []
     best_parameters = {}

@@ -73,6 +73,10 @@ class Evaluator:
             raise ValueError("blend mode expects 14 parameters")
         if self.mode == "macd" and len(params) not in (3, 4):
             raise ValueError("macd mode expects 3 or 4 parameters")
+        if self.mode == "2d_sma" and len(params) != 2:
+            raise ValueError("2d_sma mode expects 2 parameters")
+        if self.mode == "21d_macd" and len(params) != 21:
+            raise ValueError("21d_macd mode expects 21 parameters")
         self.params = params
 
     # ---------------------------------------------------------------------
@@ -101,8 +105,14 @@ class Evaluator:
             raise ValueError("Parameters not set")
         if self.mode == "blend":
             return self._simulate_blend()
-        else:
+        elif self.mode == "macd":
             return self._simulate_macd()
+        elif self.mode == "2d_sma":
+            return self._simulate_2d_sma()
+        elif self.mode == "21d_macd":
+            return self._simulate_21d_macd()
+        else:
+            raise ValueError("Unknown mode")
 
     # ---- original weighted-average crossover ----------------------------
     def _simulate_blend(self):
@@ -158,6 +168,53 @@ class Evaluator:
                 signal[i] = signal[i-1] if signal[i-1] != 0 else -1
 
         return self._backtest(signal)
+
+    # ========== 新增的 2维 SMA 模式 ==========
+    def _simulate_2d_sma(self):
+        short, long = [max(2, int(round(x))) for x in self.params]
+        sma_short = wma(self.prices, sma_kernel(short))
+        sma_long  = wma(self.prices, sma_kernel(long))
+        signal = np.where(sma_short > sma_long, 1, -1)
+        return self._backtest(signal)
+    
+
+    # ========== 新增的 21维 MACD 模式 ==========
+    def _simulate_21d_macd(self):
+        p = self.params
+        fast7   = p[:7]
+        slow7   = p[7:14]
+        sig7    = p[14:21]
+        # unpack weights and durations for each filter
+        def build_kernel(w1, w2, w3, d1, d2, d3, a):
+            d1, d2, d3 = [max(2, int(round(x))) for x in (d1, d2, d3)]
+            k1 = w1 * sma_kernel(d1)
+            k2 = w2 * lma_kernel(d2)
+            k3 = w3 * ema_kernel(d3, a)
+            total_w = w1 + w2 + w3 + 1e-6
+            maxlen = max(len(k1), len(k2), len(k3))
+            def pad(k, L): return np.pad(k, (0, L - len(k)), 'constant')
+            return (pad(k1, maxlen) + pad(k2, maxlen) + pad(k3, maxlen)) / total_w
+
+        fast_kernel = build_kernel(*fast7)
+        slow_kernel = build_kernel(*slow7)
+        sig_kernel  = build_kernel(*sig7)
+        fast_line = wma(self.prices, fast_kernel)
+        slow_line = wma(self.prices, slow_kernel)
+        macd_line = fast_line[-len(slow_line):] - slow_line
+        sig_line = wma(macd_line, sig_kernel)
+        hist = macd_line[-len(sig_line):] - sig_line
+        bullish = (hist[1:] > 0) & (hist[:-1] <= 0)
+        bearish = (hist[1:] <= 0) & (hist[:-1] > 0)
+        signal = np.zeros_like(self.prices, dtype=int)
+        minlen = len(signal) - len(hist)
+        signal[-len(hist)+1:][bullish] = 1
+        signal[-len(hist)+1:][bearish] = -1
+        # 持仓信号平移
+        for i in range(1, len(signal)):
+            if signal[i] == 0:
+                signal[i] = signal[i-1] if signal[i-1] != 0 else -1
+        return self._backtest(signal)
+
 
     # ---- common back-tester --------------------------------------------
     def _backtest(self, signal):

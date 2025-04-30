@@ -5,31 +5,31 @@ import time
 class ACO(Optimizer):
     def __init__(self, config,  evaporation_rate=0.5):
         super().__init__(config)
+        self.config = config
         self.evaporation_rate = evaporation_rate
-        self.pheromones = np.ones(14)
+        self.bounds = config["bounds"]
+        self.pheromones = np.ones(config["dim"])  # pheromone levels for each parameter
         self.convergence_curve = []
 
 
     def sample_parameters(self):
-        # Low filter: Fast
-        low_params = []
-        for i, (low, high) in enumerate(self.bounds[:7]):
+        params = []
+        int_indices = []
+        dim = self.config["dim"]
+        if dim == 14:
+            int_indices = [3,4,5,10,11,12]
+        elif dim == 21:
+            int_indices = [3,4,5,10,11,12,17,18,19]
+        elif dim == 2:
+            int_indices = [0,1]
+        elif dim == 3 or dim == 4:  
+            int_indices = [0, 1, 2]
+        for i, (low, high) in enumerate(self.bounds):
             value = np.random.uniform(low, high)
-            if i in [3, 4, 5]:  # Offset index of d1~d3
+            if i in int_indices:
                 value = int(round(value))
-            low_params.append(value)
-
-        # High filter: Slow
-        high_params = []
-        for i, (low, high) in enumerate(self.bounds[7:]):
-            if i in [3, 4, 5]:  # Offset index of d1~d3
-               low += 10  # Longer periods for high filter
-            value = np.random.uniform(low, high)
-            if i in [3, 4, 5]:
-               value = int(round(value))
-            high_params.append(value)
-
-        return low_params + high_params
+            params.append(value)
+        return params
 
 
     def optimize(self, bot):
@@ -45,7 +45,7 @@ class ACO(Optimizer):
             all_params = []
             all_scores = []
 
-            for ant in range(self.pop_size):
+            for _ in range(self.pop_size):
                 params = self.sample_parameters()
                 fitness = bot.evaluate(params)
 
@@ -59,8 +59,8 @@ class ACO(Optimizer):
             # Pheromone Update
             self.pheromones *= (1 - self.evaporation_rate)  # Expiration
             best_idx = np.argmax(all_scores)
-            best_ant = all_params[best_idx]
-            for i in range(14):
+            # best_ant = all_params[best_idx]
+            for i in range(self.config["dim"]):
                 self.pheromones[i] += all_scores[best_idx] / 1000.0  # Rewarding better parameters
             print(f"ACO iter {it+1}/{self.max_iter}, best={best_fitness:.2f}")
             self.convergence_curve.append(best_fitness)
