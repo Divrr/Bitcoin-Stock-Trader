@@ -40,8 +40,12 @@ def main():
     train_data = load_data(DATA_CFG["csv_path"],
                            start=DATA_CFG["train_start"],
                            end=DATA_CFG["train_end"])
+    test_data = load_data(DATA_CFG["csv_path"],
+                           start=DATA_CFG["test_start"],
+                           end=DATA_CFG["test_end"])
 
-    prices = train_data.values
+    train_prices = train_data.values
+    test_prices = test_data.values
 
     # Set fixed alpha
     alpha = 0.2
@@ -52,11 +56,13 @@ def main():
 
     sma_grid, ema_grid = np.meshgrid(sma_range, ema_range)
     fitness_grid = np.zeros_like(sma_grid)
+    result_grid = np.zeros_like(sma_grid)
 
     # Evaluate fitness for each (sma, ema) pair
     for i in range(sma_grid.shape[0]):
         for j in range(sma_grid.shape[1]):
-            fitness_grid[i, j] = moving_average_fitness(sma_grid[i, j], ema_grid[i, j], alpha, prices)
+            fitness_grid[i, j] = moving_average_fitness(sma_grid[i, j], ema_grid[i, j], alpha, train_prices)
+            result_grid[i, j] = moving_average_fitness(sma_grid[i, j], ema_grid[i, j], alpha, test_prices)
 
     # 3D Surface Plot
     fig = plt.figure(figsize=(14, 8))
@@ -70,12 +76,21 @@ def main():
     plt.show()
 
     # 2D Contour Plot
-    plt.figure(figsize=(10,8))
-    contour = plt.contourf(sma_grid, ema_grid, fitness_grid, levels=50, cmap='viridis')
-    plt.colorbar(contour)
-    plt.title("Fitness Contour: SMA Window vs EMA Window", fontsize=16)
-    plt.xlabel("SMA Window", fontsize=14)
-    plt.ylabel("EMA Window", fontsize=14)
+    fig = plt.figure(figsize=(14, 8))
+    ax1 = fig.add_subplot(121)
+    contour1 = ax1.contourf(sma_grid, ema_grid, fitness_grid, levels=50, cmap='viridis')
+    fig.colorbar(contour1, ax=ax1)
+    ax1.set_title("Training Data: Parameter Fitness", fontsize=16)
+    ax1.set_xlabel("SMA Window", fontsize=14)
+    ax1.set_ylabel("EMA Window", fontsize=14)
+    
+    # Testing data contour plot (right)
+    ax2 = fig.add_subplot(122)
+    contour2 = ax2.contourf(sma_grid, ema_grid, result_grid, levels=50, cmap='viridis')
+    fig.colorbar(contour2, ax=ax2)
+    ax2.set_title("Testing Data: Parameter Fitness", fontsize=16)
+    ax2.set_xlabel("SMA Window", fontsize=14)
+    ax2.set_ylabel("EMA Window", fontsize=14)
     plt.tight_layout()
     plt.show()
 
