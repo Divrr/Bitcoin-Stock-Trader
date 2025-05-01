@@ -80,10 +80,5 @@ def main():
         rounded_params = [round(p, 2) for p in py_params]
         print(f"{name}: {rounded_params}\n")
 
-    if input("Would you like to see the convergence plot? (Y/N) ") == "Y":
-        plot_convergence(optimizers, test_bot)
-    if input("Would you like to see a 2d SMA contour plotted? (Y/N) ") == "Y":
-        plot_function_space(Evaluator(train, mode="2d_sma"), Evaluator(test, mode="2d_sma"))
-
 if __name__ == "__main__":
     main()
