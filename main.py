@@ -4,7 +4,7 @@ import psutil
 import pandas as pd
 
 from optimizers import PPSO, HGSA, IGWO, ACO, CCS
-from visualisation import plot_convergence
+from visualisation import plot_convergence, plot_function_space
 from evaluator import Evaluator
 import config
 
@@ -71,8 +71,6 @@ def main():
         summary.append(metrics)
         best_parameters[opt] = params
 
-    plot_convergence(optimizers, test_bot)
-
     print(f"\n{'='*75}\nFINAL RESULTS COMPARISON\n{'='*75}")
     print(pd.DataFrame(summary).to_string(index=False))
 
@@ -82,6 +80,10 @@ def main():
         rounded_params = [round(p, 2) for p in py_params]
         print(f"{name}: {rounded_params}\n")
 
+    if input("Would you like to see the convergence plot? (Y/N) ") == "Y":
+        plot_convergence(optimizers, test_bot)
+    if input("Would you like to see a 2d SMA contour plotted? (Y/N) ") == "Y":
+        plot_function_space(Evaluator(train, mode="2d_sma"), Evaluator(test, mode="2d_sma"))
 
 if __name__ == "__main__":
     main()

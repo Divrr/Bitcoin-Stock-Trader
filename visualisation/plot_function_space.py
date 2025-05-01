@@ -1,98 +1,35 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 import numpy as np
 import matplotlib.pyplot as plt
-from evaluator import sma_kernel, ema_kernel, wma
-from main import load_data
-from config import DATA_CFG
 
-def moving_average_fitness(sma_window, ema_window, alpha, prices):
-    """Fitness function: profit from SMA/EMA crossover strategy."""
-    sma_window = int(round(sma_window))
-    ema_window = int(round(ema_window))
+def plot_function_space(train, test):
+    sma1_range = np.linspace(5, 50, 100)
+    sma2_range = np.linspace(5, 50, 100)
+    sma1_grid, sma2_grid = np.meshgrid(sma1_range, sma2_range)
 
-    sma_values = wma(prices, sma_kernel(sma_window))
-    ema_values = wma(prices, ema_kernel(ema_window, alpha))
+    def evaluate_grid(bot):
+        bot.mode = "2d_sma"
+        grid = np.zeros_like(sma1_grid)
+        for i in range(sma1_grid.shape[0]):
+            for j in range(sma1_grid.shape[1]):
+                grid[i, j] = bot.evaluate([sma1_grid[i, j], sma2_grid[i, j]])
+        return grid
 
-    min_len = min(len(sma_values), len(ema_values))
-    sma_values = sma_values[-min_len:]
-    ema_values = ema_values[-min_len:]
-    prices = prices[-min_len:]
+    train_grid = evaluate_grid(train)
+    test_grid = evaluate_grid(test)
 
-    signal = np.where(ema_values > sma_values, 1, -1)
+    vmin = min(train_grid.min(), test_grid.min())
+    vmax = max(train_grid.max(), test_grid.max())
 
-    cash, btc = 1000.0, 0.0
-    for i in range(len(signal)):
-        if signal[i] == 1 and cash > 0:
-            btc = cash / prices[i]
-            cash = 0
-        elif signal[i] == -1 and btc > 0:
-            cash = btc * prices[i]
-            btc = 0
-    if btc > 0:
-        cash = btc * prices[-1]
-    return cash
+    # --- 2D Contour Plot ---
+    fig = plt.figure(figsize=(14, 6))
+    for idx, (grid, label) in enumerate(zip([train_grid, test_grid], ['Train', 'Test'])):
+        ax = fig.add_subplot(1, 2, idx + 1)
+        contour = ax.contourf(sma1_grid, sma2_grid, grid, levels=50, cmap='viridis', vmin=vmin, vmax=vmax)
+        fig.colorbar(contour, ax=ax)
+        ax.set_title(f"{label} Evaluator - 2D Contour", fontsize=14)
+        ax.set_xlabel("High Frequency SMA", fontsize=12)
+        ax.set_ylabel("Low Frequency SMA", fontsize=12)
 
-def main():
-    # Load data
-    train_data = load_data(DATA_CFG["csv_path"],
-                           start=DATA_CFG["train_start"],
-                           end=DATA_CFG["train_end"])
-    test_data = load_data(DATA_CFG["csv_path"],
-                           start=DATA_CFG["test_start"],
-                           end=DATA_CFG["test_end"])
-
-    train_prices = train_data.values
-    test_prices = test_data.values
-
-    # Set fixed alpha
-    alpha = 0.2
-
-    # Set parameter sweep range
-    sma_range = np.linspace(5, 50, 20)   # 20 values from 5 to 50
-    ema_range = np.linspace(5, 50, 20)
-
-    sma_grid, ema_grid = np.meshgrid(sma_range, ema_range)
-    fitness_grid = np.zeros_like(sma_grid)
-    result_grid = np.zeros_like(sma_grid)
-
-    # Evaluate fitness for each (sma, ema) pair
-    for i in range(sma_grid.shape[0]):
-        for j in range(sma_grid.shape[1]):
-            fitness_grid[i, j] = moving_average_fitness(sma_grid[i, j], ema_grid[i, j], alpha, train_prices)
-            result_grid[i, j] = moving_average_fitness(sma_grid[i, j], ema_grid[i, j], alpha, test_prices)
-
-    # 3D Surface Plot
-    fig = plt.figure(figsize=(14, 8))
-    ax = fig.add_subplot(111, projection='3d')
-    ax.plot_surface(sma_grid, ema_grid, fitness_grid, cmap='viridis')
-    ax.set_title("Fitness Landscape: SMA Window vs EMA Window", fontsize=16)
-    ax.set_xlabel("SMA Window", fontsize=14)
-    ax.set_ylabel("EMA Window", fontsize=14)
-    ax.set_zlabel("Final Profit", fontsize=14)
     plt.tight_layout()
+    plt.savefig("filename.png")
     plt.show()
-
-    # 2D Contour Plot
-    fig = plt.figure(figsize=(14, 8))
-    ax1 = fig.add_subplot(121)
-    contour1 = ax1.contourf(sma_grid, ema_grid, fitness_grid, levels=50, cmap='viridis')
-    fig.colorbar(contour1, ax=ax1)
-    ax1.set_title("Training Data: Parameter Fitness", fontsize=16)
-    ax1.set_xlabel("SMA Window", fontsize=14)
-    ax1.set_ylabel("EMA Window", fontsize=14)
-    
-    # Testing data contour plot (right)
-    ax2 = fig.add_subplot(122)
-    contour2 = ax2.contourf(sma_grid, ema_grid, result_grid, levels=50, cmap='viridis')
-    fig.colorbar(contour2, ax=ax2)
-    ax2.set_title("Testing Data: Parameter Fitness", fontsize=16)
-    ax2.set_xlabel("SMA Window", fontsize=14)
-    ax2.set_ylabel("EMA Window", fontsize=14)
-    plt.tight_layout()
-    plt.show()
-
-if __name__ == "__main__":
-    main()
