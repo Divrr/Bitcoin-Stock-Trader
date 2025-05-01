@@ -70,7 +70,6 @@ class IGWO(Optimizer):
             # denom now grows with the iteration counter when the run is “infinite”, the coefficient a still decreases smoothly toward 0, 
             # so the grey-wolf step size shrinks just as in the standard algorithm.
             denom = self.max_iter if self.max_iter is not None else (iter + 1)
-            print(f"denom={denom}")
             a = 2 * np.cos((iter/int(denom)) * (np.pi / 2))
 
             # Position update
@@ -108,7 +107,7 @@ class IGWO(Optimizer):
 
                 
 
-            print(f"IGWO iter {iter + 1}/{self.max_iter} best={alpha_score:.2f}")
+            print(f"IGWO iter {iter+1}, best={alpha_score:.2f}", end="\r")
             self.convergence_curve.append(alpha_score)
 
 
@@ -118,4 +117,5 @@ class IGWO(Optimizer):
             if self._should_stop(start_time, calls_made, best_hist):
                 break
 
-        return alpha_pos
+        print()
+        return alpha_pos, alpha_score

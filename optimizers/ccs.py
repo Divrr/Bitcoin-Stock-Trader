@@ -25,14 +25,15 @@ class CCS(Optimizer):
                     best_point = self.current[:]
 
             self.convergence_curve.append(best_val)
-            print(f"CCS iter {it+1}/{self.max_iter}  best={best_val:.2f}")
+            print(f"CCS iter {it+1}, best={best_val:.2f}", end="\r")
 
             history.append(best_val)
             calls_made = bot.eval_count - calls0
             if self._should_stop(start_time, calls_made, history):
                 break
 
-        return best_point
+        print()
+        return best_point, best_val
 
     def _line_search(self, dim, point, bot, step_fraction=0.5, step_count=5):
         lb, ub = self.bounds[dim]
@@ -53,6 +54,3 @@ class CCS(Optimizer):
         # update point
         point[dim] = best_coord
         return best_val
-
-    def __str__(self):
-        return f"CyclicCSS(max_iter={self.max_iter})"

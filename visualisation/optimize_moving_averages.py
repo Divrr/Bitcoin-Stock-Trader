@@ -74,7 +74,7 @@ def main():
     }
 
     optimizer = IGWO(config)
-    best_params = optimizer.optimize(bot)
+    best_params, _ = optimizer.optimize(bot)
 
     print("\n==============================")
     print("Optimization Completed")
