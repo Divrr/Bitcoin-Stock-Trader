@@ -1,25 +1,9 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 import matplotlib.pyplot as plt
-from optimizers import IGWO, ACO, HGSA, PPSO, CCS
-from evaluator import Evaluator
-from main import load_data
-from config import COMMON_CFG, DATA_CFG
 
-def main():
-    train_data = load_data(DATA_CFG["csv_path"],
-                           start=DATA_CFG["train_start"],
-                           end=DATA_CFG["train_end"])
-    bot = Evaluator(train_data, mode="blend")
-
-    optimizers = [ACO(COMMON_CFG), HGSA(COMMON_CFG), IGWO(COMMON_CFG), PPSO(COMMON_CFG), CCS(COMMON_CFG)]
+def plot_convergence(optimizers, bot):
     results = {}
-
     for optimizer in optimizers:
-        optimizer.optimize(bot)
-        results[optimizer.__class__.__name__] = optimizer.convergence_curve
+        results[optimizer] = optimizer.convergence_curve
 
     for name, fitness_list in results.items():
         plt.plot(fitness_list, label=name)
@@ -30,6 +14,3 @@ def main():
     plt.legend()
     plt.grid(True)
     plt.show()
-
-if __name__ == "__main__":
-    main()

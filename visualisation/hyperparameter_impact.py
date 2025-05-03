@@ -18,7 +18,7 @@ def run_optimizer_with_config(optimizer_class, bot, pop_size, max_iter, max_time
         "max_time": max_time
     }
     optimizer = optimizer_class(config)
-    best_params = optimizer.optimize(bot)
+    best_params, _ = optimizer.optimize(bot)
     best_profit = bot.evaluate(best_params)
     return best_profit
 
