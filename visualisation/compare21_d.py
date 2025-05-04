@@ -19,7 +19,7 @@ from config     import get_search_space, COMMON_CFG, DATA_CFG
 # ---------------------------------------------------------------------
 # EXPERIMENT CONSTANTS
 # ---------------------------------------------------------------------
-POP_SIZES  = [100]     # sweep values
+POP_SIZES  = [100, 200, 300]     # sweep values
 ITERATIONS = 100                 # fixed generations
 MODE       = "21d_macd"          # only this mode is tested
 # ---------------------------------------------------------------------
