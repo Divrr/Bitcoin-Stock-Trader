@@ -14,8 +14,8 @@ DATA_CFG = {
 def get_search_space(mode):
     if mode == "blend":
         bounds = [
-            (0,1),(0,1),(0,1),(5,50),(5,50),(5,50),(0.1,0.95),
-            (0,1),(0,1),(0,1),(5,50),(5,50),(5,50),(0.1,0.95)
+            (0,1),(0,1),(0,1),(5,200),(5,200),(5,200),(0.1,0.95),
+            (0,1),(0,1),(0,1),(5,200),(5,200),(5,200),(0.1,0.95)
         ]
     elif mode == "macd":
         # Standard MACD, three adjustable windows (optional with threshold)
