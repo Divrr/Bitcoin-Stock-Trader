@@ -35,7 +35,7 @@ def main():
     fixed_max_time = None  # normally None unless we test max_time
 
     # Common Evaluator instance
-    bot = Evaluator(train_data, mode="blend")
+    bot = Evaluator(train_data, mode=DATA_CFG["mode"])
 
     # ------ 1. Population Size Test ------
     pop_sizes = [10, 20, 30, 40, 50, 60]
