@@ -12,7 +12,9 @@ def main():
     train_data = load_data(DATA_CFG["csv_path"],
                            start=DATA_CFG["train_start"],
                            end=DATA_CFG["train_end"])
-    bot = Evaluator(train_data, mode="blend")
+
+    mode = DATA_CFG.get("mode", "blend") 
+    bot = Evaluator(train_data, mode=mode)
 
     optimizers = [ACO(COMMON_CFG), HGSA(COMMON_CFG), IGWO(COMMON_CFG), PPSO(COMMON_CFG), CCS(COMMON_CFG)]
     results = {}
