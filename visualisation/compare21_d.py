@@ -2,7 +2,7 @@
 # pop_sweep_21d.py
 #
 # Compare population sizes (100, 200, 300) for the 21‑D MACD strategy.
-# Produces a single plot: Test Profit vs Population Size (one line per optimiser).
+# Produces barplot: Test Profit vs Population Size (one bar per optimizer in each pop size group).
 
 import sys, os, copy, time, psutil
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -19,7 +19,7 @@ from config     import get_search_space, COMMON_CFG, DATA_CFG
 # ---------------------------------------------------------------------
 # EXPERIMENT CONSTANTS
 # ---------------------------------------------------------------------
-POP_SIZES  = [100, 200, 300]     # sweep values
+POP_SIZES  = [100]     # sweep values
 ITERATIONS = 100                 # fixed generations
 MODE       = "21d_macd"          # only this mode is tested
 # ---------------------------------------------------------------------
@@ -29,7 +29,7 @@ def evaluate_optimizer(opt, train_bot, test_bot):
     """Run a single optimiser; return metrics + best parameters."""
     print(f"{'-'*10}{opt.__class__.__name__}{'-'*10}")
 
-    # reset counters in case the bot has been reused
+    # reset counters
     train_bot.eval_count = 0
     train_bot.eval_time  = 0
 
@@ -56,11 +56,11 @@ def evaluate_optimizer(opt, train_bot, test_bot):
 
 def compare_population():
     """Run 21‑D MACD for every pop size; return results DataFrame."""
-    # 1) force mode once
+    # force mode
     DATA_CFG["mode"] = MODE
     dim, bounds = get_search_space(MODE)
 
-    # 2) load price data once
+    # load data once
     train = load_data(DATA_CFG["csv_path"], DATA_CFG["train_start"], DATA_CFG["train_end"])
     test  = load_data(DATA_CFG["csv_path"], DATA_CFG["test_start"],  DATA_CFG["test_end"])
 
@@ -94,14 +94,15 @@ def compare_population():
 
 
 def plot_results(df):
-    """Single line chart: pop_size vs Test$."""
+    """Barplot: pop_size vs Test$ grouped by Optimizer."""
     df["Test$"] = pd.to_numeric(df["Test$"], errors="coerce")
+
     plt.figure(figsize=(10, 6))
-    sns.barplot(data=df, x="pop_size", y="Test$", hue="Optimizer", marker="o")
+    sns.barplot(data=df, x="pop_size", y="Test$", hue="Optimizer")
     plt.title(f"21‑D MACD — Test Profit vs Population Size (iters={ITERATIONS})")
     plt.xlabel("Population size")
     plt.ylabel("Test Profit ($)")
-    plt.grid(True)
+    plt.legend(title="Optimizer")
     plt.tight_layout()
     plt.show()
 
@@ -110,4 +111,3 @@ if __name__ == "__main__":
     df_results = compare_population()
     print("\nSUMMARY\n", df_results[["Optimizer", "pop_size", "Test$"]].to_string(index=False))
     plot_results(df_results)
-
