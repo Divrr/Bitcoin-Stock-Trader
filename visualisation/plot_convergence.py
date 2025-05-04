@@ -7,6 +7,8 @@ from optimizers import IGWO, ACO, HGSA, PPSO, CCS
 from evaluator import Evaluator
 from main import load_data
 from config import COMMON_CFG, DATA_CFG
+import numpy as np
+import random
 
 def main():
     train_data = load_data(DATA_CFG["csv_path"],
@@ -34,4 +36,6 @@ def main():
     plt.show()
 
 if __name__ == "__main__":
+    random.seed(42)
+    np.random.seed(42)
     main()
