@@ -62,7 +62,7 @@ class Optimizer(ABC):
             window = best_history[-self.patience:]
             if max(window) - window[0] < self.min_delta:
                 print_stop()
-                print(f"Stopping: no improvement in last {self.patience} iterations\n")
+                print(f"Stopping: no improvement of <{self.min_delta} in last {self.patience} iterations\n")
                 return True
         return False
 
