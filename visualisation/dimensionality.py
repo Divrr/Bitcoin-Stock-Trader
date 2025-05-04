@@ -25,7 +25,7 @@ def evaluate_optimizer(optimizer, train_bot, test_bot):
     mem_start = proc.memory_info().rss / 1e6
     time_start = time.time()
 
-    best_params, train_fitness = optimizer.optimize(train_bot)
+    best_params = optimizer.optimize(train_bot)
 
     wall_time = time.time() - time_start
     mem_end = proc.memory_info().rss / 1e6
@@ -36,7 +36,6 @@ def evaluate_optimizer(optimizer, train_bot, test_bot):
 
     metrics = {
         "Optimizer": optimizer,
-        "Train$": round(train_fitness, 2),
         "Test$": round(test_fitness, 2),
         "Fitness Calls": eval_calls,
         "Total(s)": round(wall_time, 2),
