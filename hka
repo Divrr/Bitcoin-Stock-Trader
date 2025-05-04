@@ -1,0 +1,112 @@
+[33m09ae1fc[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull: Fast-forward
+[33m48045f2[m HEAD@{1}: checkout: moving from dimensionality to main
+[33me568bb8[m[33m ([m[1;31morigin/dimensionality[m[33m, [m[1;32mdimensionality[m[33m)[m HEAD@{2}: checkout: moving from dimensionality2 to dimensionality
+[33m005d1b4[m[33m ([m[1;31morigin/visualize[m[33m, [m[1;31morigin/dimensionality2[m[33m, [m[1;32mvisualize[m[33m, [m[1;32mdimensionality2[m[33m)[m HEAD@{3}: checkout: moving from main to dimensionality2
+[33m48045f2[m HEAD@{4}: checkout: moving from dimensionality2 to main
+[33m005d1b4[m[33m ([m[1;31morigin/visualize[m[33m, [m[1;31morigin/dimensionality2[m[33m, [m[1;32mvisualize[m[33m, [m[1;32mdimensionality2[m[33m)[m HEAD@{5}: checkout: moving from visualize to dimensionality2
+[33m005d1b4[m[33m ([m[1;31morigin/visualize[m[33m, [m[1;31morigin/dimensionality2[m[33m, [m[1;32mvisualize[m[33m, [m[1;32mdimensionality2[m[33m)[m HEAD@{6}: reset: moving to HEAD
+[33m005d1b4[m[33m ([m[1;31morigin/visualize[m[33m, [m[1;31morigin/dimensionality2[m[33m, [m[1;32mvisualize[m[33m, [m[1;32mdimensionality2[m[33m)[m HEAD@{7}: checkout: moving from main to visualize
+[33m48045f2[m HEAD@{8}: pull: Fast-forward
+[33m3d14b6e[m HEAD@{9}: checkout: moving from experiments to main
+[33m96c4849[m[33m ([m[1;31morigin/experiments[m[33m, [m[1;32mexperiments[m[33m)[m HEAD@{10}: checkout: moving from anushka to experiments
+[33m4b2962c[m[33m ([m[1;31morigin/anushka[m[33m, [m[1;32manushka[m[33m)[m HEAD@{11}: reset: moving to HEAD
+[33m4b2962c[m[33m ([m[1;31morigin/anushka[m[33m, [m[1;32manushka[m[33m)[m HEAD@{12}: checkout: moving from c3a2e3a7f8de59946189531b43a50096e0d1788b to anushka
+[33mc3a2e3a[m HEAD@{13}: checkout: moving from anushka to c3a2e3a
+[33m4b2962c[m[33m ([m[1;31morigin/anushka[m[33m, [m[1;32manushka[m[33m)[m HEAD@{14}: checkout: moving from c3a2e3a7f8de59946189531b43a50096e0d1788b to anushka
+[33mc3a2e3a[m HEAD@{15}: checkout: moving from anushka to c3a2e3a
+[33m4b2962c[m[33m ([m[1;31morigin/anushka[m[33m, [m[1;32manushka[m[33m)[m HEAD@{16}: reset: moving to HEAD
+[33m4b2962c[m[33m ([m[1;31morigin/anushka[m[33m, [m[1;32manushka[m[33m)[m HEAD@{17}: checkout: moving from c3a2e3a7f8de59946189531b43a50096e0d1788b to anushka
+[33mc3a2e3a[m HEAD@{18}: checkout: moving from anushka to c3a2e3a
+[33m4b2962c[m[33m ([m[1;31morigin/anushka[m[33m, [m[1;32manushka[m[33m)[m HEAD@{19}: merge experiments: Merge made by the 'ort' strategy.
+[33m0fe871e[m HEAD@{20}: checkout: moving from experiments to anushka
+[33m96c4849[m[33m ([m[1;31morigin/experiments[m[33m, [m[1;32mexperiments[m[33m)[m HEAD@{21}: checkout: moving from anushka to experiments
+[33m0fe871e[m HEAD@{22}: checkout: moving from experiments to anushka
+[33m96c4849[m[33m ([m[1;31morigin/experiments[m[33m, [m[1;32mexperiments[m[33m)[m HEAD@{23}: commit: added plots for dimensionality
+[33md3a892b[m HEAD@{24}: checkout: moving from anushka to experiments
+[33m0fe871e[m HEAD@{25}: merge main: Merge made by the 'ort' strategy.
+[33m71d1cd7[m HEAD@{26}: checkout: moving from main to anushka
+[33m3d14b6e[m HEAD@{27}: pull: Fast-forward
+[33mc3a2e3a[m HEAD@{28}: checkout: moving from anushka to main
+[33m71d1cd7[m HEAD@{29}: commit: Max Iterations Max time
+[33mc3a2e3a[m HEAD@{30}: merge main: Fast-forward
+[33md59ce8c[m HEAD@{31}: checkout: moving from multi-dim to anushka
+[33m59814d5[m[33m ([m[1;31morigin/multi-dim[m[33m, [m[1;32mmulti-dim[m[33m)[m HEAD@{32}: checkout: moving from main to multi-dim
+[33mc3a2e3a[m HEAD@{33}: pull: Fast-forward
+[33m4ee96bd[m HEAD@{34}: pull: Fast-forward
+[33m590b2cf[m HEAD@{35}: checkout: moving from anushka to main
+[33md59ce8c[m HEAD@{36}: commit: improgress - testing 2 dim
+[33m5dbfb89[m HEAD@{37}: commit: Function space added
+[33md9aa69b[m HEAD@{38}: reset: moving to HEAD
+[33md9aa69b[m HEAD@{39}: commit: hyperparam
+[33mebb6aeb[m HEAD@{40}: commit: Best Parameters Found
+[33m393a71f[m HEAD@{41}: commit: moving average plots
+[33m0e86b09[m HEAD@{42}: commit (merge): merge conflict resolved
+[33m65bd6ea[m HEAD@{43}: reset: moving to HEAD
+[33m65bd6ea[m HEAD@{44}: checkout: moving from main to anushka
+[33m590b2cf[m HEAD@{45}: pull: Fast-forward
+[33ma531273[m HEAD@{46}: checkout: moving from anushka to main
+[33m65bd6ea[m HEAD@{47}: commit: convergency plot
+[33m6f7e745[m HEAD@{48}: reset: moving to HEAD
+[33m6f7e745[m HEAD@{49}: merge main: Merge made by the 'ort' strategy.
+[33mf95150c[m HEAD@{50}: checkout: moving from main to anushka
+[33ma531273[m HEAD@{51}: pull: Fast-forward
+[33mc34f7c1[m HEAD@{52}: checkout: moving from anushka to main
+[33mf95150c[m HEAD@{53}: commit: remove bias and check alpha is best ot not
+[33medafdc4[m HEAD@{54}: merge MACD: Merge made by the 'ort' strategy.
+[33m1fda958[m HEAD@{55}: checkout: moving from MACD to anushka
+[33mb6fa4fb[m[33m ([m[1;32mMACD[m[33m)[m HEAD@{56}: pull: Fast-forward
+[33m0dd1406[m HEAD@{57}: checkout: moving from visualize to MACD
+[33m005d1b4[m[33m ([m[1;31morigin/visualize[m[33m, [m[1;31morigin/dimensionality2[m[33m, [m[1;32mvisualize[m[33m, [m[1;32mdimensionality2[m[33m)[m HEAD@{58}: commit: chnages
+[33mcac8f9b[m HEAD@{59}: commit: time added
+[33m2145554[m HEAD@{60}: reset: moving to HEAD
+[33m2145554[m HEAD@{61}: reset: moving to HEAD
+[33m2145554[m HEAD@{62}: commit: visualt site
+[33m0dd1406[m HEAD@{63}: checkout: moving from MACD to visualize
+[33m0dd1406[m HEAD@{64}: pull: Merge made by the 'ort' strategy.
+[33m35ba132[m HEAD@{65}: merge main: Merge made by the 'ort' strategy.
+[33m4865928[m HEAD@{66}: checkout: moving from main to MACD
+[33mc34f7c1[m HEAD@{67}: checkout: moving from anushka to main
+[33m1fda958[m HEAD@{68}: commit: rad me file updated
+[33m8bb308d[m[33m ([m[1;31morigin/aco[m[33m, [m[1;32maco[m[33m)[m HEAD@{69}: checkout: moving from MACD to anushka
+[33m4865928[m HEAD@{70}: checkout: moving from MACD to MACD
+[33m4865928[m HEAD@{71}: checkout: moving from anushka to MACD
+[33m8bb308d[m[33m ([m[1;31morigin/aco[m[33m, [m[1;32maco[m[33m)[m HEAD@{72}: checkout: moving from MACD to anushka
+[33m4865928[m HEAD@{73}: checkout: moving from anushka to MACD
+[33m8bb308d[m[33m ([m[1;31morigin/aco[m[33m, [m[1;32maco[m[33m)[m HEAD@{74}: checkout: moving from direct_method_CRC to anushka
+[33m0efe5e2[m[33m ([m[1;32mdirect_method_CRC[m[33m)[m HEAD@{75}: checkout: moving from MACD to direct_method_CRC
+[33m4865928[m HEAD@{76}: checkout: moving from evaluation_function to MACD
+[33m8dbcce1[m[33m ([m[1;31morigin/evaluation_function[m[33m, [m[1;32mevaluation_function[m[33m)[m HEAD@{77}: pull: Fast-forward
+[33mf56faf1[m HEAD@{78}: checkout: moving from anushka to evaluation_function
+[33m8bb308d[m[33m ([m[1;31morigin/aco[m[33m, [m[1;32maco[m[33m)[m HEAD@{79}: checkout: moving from evaluation_function to anushka
+[33mf56faf1[m HEAD@{80}: checkout: moving from evaluation_function to evaluation_function
+[33mf56faf1[m HEAD@{81}: checkout: moving from anushka to evaluation_function
+[33m8bb308d[m[33m ([m[1;31morigin/aco[m[33m, [m[1;32maco[m[33m)[m HEAD@{82}: merge aco: Fast-forward
+[33mf56faf1[m HEAD@{83}: checkout: moving from aco to anushka
+[33m8bb308d[m[33m ([m[1;31morigin/aco[m[33m, [m[1;32maco[m[33m)[m HEAD@{84}: checkout: moving from main to aco
+[33mc34f7c1[m HEAD@{85}: pull: Merge made by the 'ort' strategy.
+[33m4758427[m HEAD@{86}: pull: Merge made by the 'ort' strategy.
+[33mf56faf1[m HEAD@{87}: merge evaluation_function: Fast-forward
+[33m9dcfc9d[m HEAD@{88}: checkout: moving from evaluation_function to main
+[33mf56faf1[m HEAD@{89}: merge anushka: Fast-forward
+[33m43bafbb[m HEAD@{90}: checkout: moving from anushka to evaluation_function
+[33mf56faf1[m HEAD@{91}: commit: Class name bug fix
+[33me1a9594[m HEAD@{92}: commit (merge): Merge branch 'evaluation_function' into anushka
+[33mb68d401[m HEAD@{93}: checkout: moving from evaluation_function to anushka
+[33m43bafbb[m HEAD@{94}: pull: Fast-forward
+[33m4c8bd95[m HEAD@{95}: checkout: moving from anushka to evaluation_function
+[33mb68d401[m HEAD@{96}: checkout: moving from evaluation_function to anushka
+[33m4c8bd95[m HEAD@{97}: checkout: moving from anushka to evaluation_function
+[33mb68d401[m HEAD@{98}: commit: value print test
+[33mcf88ce8[m HEAD@{99}: reset: moving to HEAD
+[33mcf88ce8[m HEAD@{100}: commit: Block comment for name function
+[33m3154dc2[m HEAD@{101}: commit: revert __name__ fix back
+[33ma2b8156[m HEAD@{102}: commit: revert __name__
+[33m5c2ca9d[m HEAD@{103}: commit: Read file updated
+[33md5fcc01[m HEAD@{104}: commit: bug fix
+[33mfc102b2[m HEAD@{105}: commit: integerate with anushka's repo
+[33m4c8bd95[m HEAD@{106}: merge evaluation_function: Fast-forward
+[33m9dcfc9d[m HEAD@{107}: checkout: moving from evaluation_function to anushka
+[33m4c8bd95[m HEAD@{108}: checkout: moving from anushka to evaluation_function
+[33m9dcfc9d[m HEAD@{109}: checkout: moving from main to anushka
+[33m9dcfc9d[m HEAD@{110}: commit: test
+[33m393eb51[m HEAD@{111}: clone: from https://github.com/Divrr/Bitcoin-Stock-Trader.git
