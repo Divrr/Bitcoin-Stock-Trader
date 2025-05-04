@@ -8,7 +8,7 @@ DATA_CFG = {
     "train_end"  : "2019-12-31",
     "test_start" : "2019-12-31",
     "test_end"   : "2022-01-01",
-    "mode": "macd",   # # Supports "blend" (14 dimensions), "2d_sma" (2 dimensions), "21d_macd" (21 dimensions), "macd" (3 dimensions)
+    "mode": "blend",   # # Supports "blend" (14 dimensions), "2d_sma" (2 dimensions), "21d_macd" (21 dimensions), "macd" (3 dimensions)
 }
 
 def get_search_space(mode):

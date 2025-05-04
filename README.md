@@ -1,7 +1,7 @@
 # Bitcoin-Stock-Trader
 CITS4404 project
 
-# bot.py – Trading Bot Evaluation
+# evaluator.py – Trading Bot Evaluation
 This module implements the Evaluator class, which simulates and evaluates Bitcoin trading bots based on technical analysis using moving average crossovers.
 
 ##      Applied Concepts:
