@@ -43,7 +43,7 @@ def main():
                            end=DATA_CFG["train_end"])
 
     # Constants
-    fixed_pop_size = 30
+    fixed_pop_size = 60
     fixed_max_iter = 30
     fixed_max_time = None
 
@@ -60,7 +60,7 @@ def main():
     }
 
     # ------ 1. Population Size Test ------
-    pop_sizes = [10, 20, 30, 40, 50, 60]
+    pop_sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     profits_popsize = {name: [] for name in optimizers_to_test}
 
     for pop_size in pop_sizes:
@@ -78,7 +78,7 @@ def main():
     )
 
     # ------ 2. Max Iterations Test ------
-    max_iters = [10, 20, 30, 50, 100]
+    max_iters = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150]
     profits_maxiter = {name: [] for name in optimizers_to_test}
 
     for max_iter in max_iters:
