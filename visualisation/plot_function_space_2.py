@@ -9,8 +9,8 @@ import config
 from evaluator import Evaluator
 
 def plot_function_space(train, test):
-    sma1_range = np.linspace(5, 200, 200)
-    sma2_range = np.linspace(5, 200, 200)
+    sma1_range = np.linspace(5, 500, 500)
+    sma2_range = np.linspace(5, 500, 500)
     sma1_grid, sma2_grid = np.meshgrid(sma1_range, sma2_range)
 
     def evaluate_grid(bot):
