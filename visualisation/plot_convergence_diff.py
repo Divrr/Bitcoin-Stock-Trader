@@ -60,6 +60,7 @@ def plot_convergence_grids(seeds, dataset_type="train"):
     # Add spacing around subplots
     plt.subplots_adjust(hspace=0.4, wspace=0.3)
     plt.tight_layout(rect=[0, 0, 1, 0.93])
+    plt.savefig("plot_convergence_diff")
     plt.show()
 
 def main():
@@ -70,4 +71,6 @@ def main():
     plot_convergence_grids(seeds, dataset_type="test")
 
 if __name__ == "__main__":
+    random.seed(42)
+    np.random.seed(42)
     main()
