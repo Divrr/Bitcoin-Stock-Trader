@@ -16,7 +16,7 @@ def run_experiment(data_cfg, common_cfg):
     train = load_data(d["csv_path"], d["train_start"], d["train_end"])
     test  = load_data(d["csv_path"], d["test_start"],  d["test_end"])
 
-    mode = d.get("mode", "blend")
+    mode = d.get("mode")
 
     train_bot = Evaluator(train, mode=mode)
     test_bot  = Evaluator(test,  mode=mode)
@@ -80,6 +80,9 @@ def main():
             py_params = list(params)
         rounded = [round(p, 2) for p in py_params]
         print(f"{name}: {rounded}\n")
+        
+    
+    
 
 
 if __name__ == "__main__":

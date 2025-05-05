@@ -8,6 +8,7 @@ mode="macd"  : 3-parameter (optional 4) MACD strategy
 
 import numpy as np
 import time  # for evaluation timing
+from config import DATA_CFG 
 
 # --- Weighted Moving Average kernels ---
 # Simple Moving Average kernel: equal weights over window of length N
@@ -50,15 +51,18 @@ def compute_MACD(prices, short_span, long_span, signal_span):
     return macd_line, signal_line, histogram
 
 class Evaluator:
-    def __init__(self, prices, mode="blend"):
+    def __init__(self, prices, mode=None):
         """
         Initialize evaluator with price series and mode.
         mode="blend" uses 14-parameter high/low WMA crossover
         mode="macd" uses MACD strategy (3-4 parameters)
         """
         self.prices = np.array(prices, dtype=float)
-        self.mode   = mode
+        self.mode = mode if mode is not None else DATA_CFG.get("mode")
         self.params = None
+
+        print(f"Evaluator initialized in mode: {self.mode}")
+
 
         # Evaluation cost metrics
         self.eval_count = 0   # total number of fitness calls
@@ -113,6 +117,9 @@ class Evaluator:
             return self._simulate_21d_macd()
         else:
             raise ValueError("Unknown mode")
+        
+        print(f"Running simulate_trading with mode = {self.mode}")
+
 
     # ---- original weighted-average crossover ----------------------------
     def _simulate_blend(self):
@@ -169,7 +176,7 @@ class Evaluator:
 
         return self._backtest(signal)
 
-    # ========== 2d SMA mode ==========
+    # ========== 2D SMA mode ==========
     def _simulate_2d_sma(self):
         short, long = [max(2, int(round(x))) for x in self.params]
         sma_short = wma(self.prices, sma_kernel(short))
@@ -178,7 +185,7 @@ class Evaluator:
         return self._backtest(signal)
     
 
-    # ========== 21d MACD mode ==========
+    # ==========  21D MACD mode ==========
     def _simulate_21d_macd(self):
         p = self.params
         fast7   = p[:7]
@@ -209,6 +216,7 @@ class Evaluator:
         minlen = len(signal) - len(hist)
         signal[-len(hist)+1:][bullish] = 1
         signal[-len(hist)+1:][bearish] = -1
+        # Position signal shift
         for i in range(1, len(signal)):
             if signal[i] == 0:
                 signal[i] = signal[i-1] if signal[i-1] != 0 else -1
