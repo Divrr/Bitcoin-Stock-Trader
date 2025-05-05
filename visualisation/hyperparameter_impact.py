@@ -59,7 +59,7 @@ def main():
         "CCS": CCS
     }
 
-    ------ 1. Population Size Test ------
+    # ------ 1. Population Size Test ------
     pop_sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     profits_popsize = {name: [] for name in optimizers_to_test}
 
