@@ -59,23 +59,23 @@ def main():
         "CCS": CCS
     }
 
-    # ------ 1. Population Size Test ------
-    # pop_sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    # profits_popsize = {name: [] for name in optimizers_to_test}
+    ------ 1. Population Size Test ------
+    pop_sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    profits_popsize = {name: [] for name in optimizers_to_test}
 
-    # for pop_size in pop_sizes:
-    #     print(f"Testing Population Size = {pop_size}")
-    #     for name, optimizer in optimizers_to_test.items():
-    #         profit = run_optimizer_with_config(optimizer, bot, pop_size, fixed_max_iter, None)
-    #         profits_popsize[name].append(profit)
+    for pop_size in pop_sizes:
+        print(f"Testing Population Size = {pop_size}")
+        for name, optimizer in optimizers_to_test.items():
+            profit = run_optimizer_with_config(optimizer, bot, pop_size, fixed_max_iter, None)
+            profits_popsize[name].append(profit)
 
-    # plot_and_save(
-    #     pop_sizes,
-    #     profits_popsize,
-    #     x_label="Population Size",
-    #     title="Population Size vs Profit",
-    #     filename="population_size_vs_profit.png"
-    # )
+    plot_and_save(
+        pop_sizes,
+        profits_popsize,
+        x_label="Population Size",
+        title="Population Size vs Profit",
+        filename="population_size_vs_profit.png"
+    )
 
     # ------ 2. Max Iterations Test ------
     max_iters = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150]
