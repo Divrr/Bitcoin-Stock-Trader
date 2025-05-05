@@ -38,7 +38,7 @@ def run_optimizer_with_seed(seed, dataset_type="train"):
 
 def plot_convergence_grids(seeds, dataset_type="train"):
     fig, axs = plt.subplots(3, 3, figsize=(14, 12))
-    fig.suptitle(f"Convergence Curves ({dataset_type.capitalize()} Data)", fontsize=18)
+    fig.suptitle(f"Convergence Curves ({dataset_type.capitalize()} Data)", fontsize=18, y=0.95)
 
     for i, seed in enumerate(seeds):
         row, col = divmod(i, 3)
