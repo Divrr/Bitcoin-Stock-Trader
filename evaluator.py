@@ -169,7 +169,7 @@ class Evaluator:
 
         return self._backtest(signal)
 
-    # ========== 新增的 2维 SMA 模式 ==========
+    # ========== 2d SMA mode ==========
     def _simulate_2d_sma(self):
         short, long = [max(2, int(round(x))) for x in self.params]
         sma_short = wma(self.prices, sma_kernel(short))
@@ -178,7 +178,7 @@ class Evaluator:
         return self._backtest(signal)
     
 
-    # ========== 新增的 21维 MACD 模式 ==========
+    # ========== 21d MACD mode ==========
     def _simulate_21d_macd(self):
         p = self.params
         fast7   = p[:7]
@@ -209,7 +209,6 @@ class Evaluator:
         minlen = len(signal) - len(hist)
         signal[-len(hist)+1:][bullish] = 1
         signal[-len(hist)+1:][bearish] = -1
-        # 持仓信号平移
         for i in range(1, len(signal)):
             if signal[i] == 0:
                 signal[i] = signal[i-1] if signal[i-1] != 0 else -1
