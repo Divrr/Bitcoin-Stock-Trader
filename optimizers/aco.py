@@ -62,7 +62,7 @@ class ACO(Optimizer):
             # best_ant = all_params[best_idx]
             for i in range(self.config["dim"]):
                 self.pheromones[i] += all_scores[best_idx] / 1000.0  # Rewarding better parameters
-            print(f"ACO iter {it+1}/{self.max_iter}, best={best_fitness:.2f}")
+            print(f"ACO iter {it+1}/{self.max_iter}, best={best_fitness:.2f}", end="\r")
             self.convergence_curve.append(best_fitness)
 
             

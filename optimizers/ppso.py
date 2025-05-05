@@ -14,7 +14,6 @@ class PPSO(Optimizer):
         self.bounds = np.array(self.bounds) 
         v_max = np.full((self.pop_size, self.dim), 0.5 * (self.bounds[:, 1] - self.bounds[:, 0]))
         pop = np.random.uniform(self.bounds[:, 0], self.bounds[:, 1], size=(self.pop_size, self.dim))
-        print("pop shape = ", pop.shape)
         theta = np.random.uniform(0, 2 * np.pi, size=self.pop_size)
 
         p_best = pop.copy()
@@ -55,7 +54,7 @@ class PPSO(Optimizer):
                 theta[i] += np.abs(np.cos(theta[i]) + np.sin(theta[i])) * (2 * np.pi)
                 v_max[i] = np.abs(np.cos(theta[i]))**2 * (self.bounds[:, 1] - self.bounds[:, 0])
             
-            print(f"PPSO iter {it+1}/{self.max_iter}  best={g_val:.2f}")
+            print(f"PPSO iter {it+1}/{self.max_iter}  best={g_val:.2f}", end="\r")
             self.convergence_curve.append(g_val)
 
             # *****************************************************************************************
