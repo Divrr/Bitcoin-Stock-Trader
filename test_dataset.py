@@ -4,7 +4,6 @@ import copy
 from config import DATA_CFG, COMMON_CFG, get_search_space
 from main import run_experiment
 
-# 固定测试集结束时间，改变训练集开始时间
 train_starts = [
     "2014-11-28",
     "2015-11-28",
@@ -12,7 +11,7 @@ train_starts = [
     "2017-11-28",
 ]
 
-DATA_CFG["mode"] = "blend"  # 固定为blend模式
+DATA_CFG["mode"] = "blend" 
 mode = DATA_CFG["mode"]
 dim, bounds = get_search_space(mode)
 COMMON_CFG["dim"] = dim
@@ -34,10 +33,8 @@ for start_date in train_starts:
         results[start_date][opt] = row["Test$"]
         optimizers_set.add(opt)
 
-# 构建 DataFrame: index = 日期，列 = Optimizer
 df_result = pd.DataFrame(results).T.sort_index()
 
-# 绘图
 plt.figure(figsize=(10, 6))
 for opt in sorted(optimizers_set):
     plt.plot(df_result.index, df_result[opt], marker='o', label=opt)
