@@ -83,7 +83,7 @@ def analyze_results(results_file="results/optimizer_results.csv"):
                 scores1 = df[df["optimizer"] == opt1]["score"]
                 scores2 = df[df["optimizer"] == opt2]["score"]
                 stat, p = ttest_ind(scores1, scores2, equal_var=True)  # set False if Levene fails
-                print(f"{opt1} vs {opt2}: t = {stat:.2f}, p = {p:.4f}")
+                print(f"{opt1} vs {opt2}: t = {stat:.2f}, p = {'<0.0001' if p < 0.0001 else f'{p:.4f}'}")
         else:
             print("=> No statistically significant difference among groups.")
         
@@ -91,7 +91,7 @@ def analyze_results(results_file="results/optimizer_results.csv"):
     print("\n===== Showing Boxplot =====")
     plt.figure(figsize=(12, 6))
     sns.boxplot(data=df, x="optimizer", y="score", palette="Set3", showmeans=True)
-    plt.title("Boxplot of Optimizer Scores")
+    plt.title("Optimizer Scores")
     plt.ylabel("Test Score (Fitness or Profit)")
     plt.grid(True)
     plt.tight_layout()
