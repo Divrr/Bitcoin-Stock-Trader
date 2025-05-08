@@ -2,15 +2,48 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from main import load_data, evaluate_optimizer
+from main import load_data
 from evaluator import Evaluator
 from optimizers import ACO, HGSA, IGWO, PPSO, CCS 
 from config import get_search_space, COMMON_CFG, DATA_CFG
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import psutil
+import time
 
 MODES = ["2d_sma", "macd", "blend", "21d_macd"]
+
+def evaluate_optimizer(optimizer, train_bot, test_bot):
+    """Run a single optimizer and return performance metrics and best parameters."""
+    print(f"{'-'*10}{optimizer}{'-'*10}")
+
+    train_bot.eval_count = 0
+    train_bot.eval_time = 0
+
+    proc = psutil.Process(os.getpid())
+    mem_start = proc.memory_info().rss / 1e6
+    time_start = time.time()
+
+    best_params = optimizer.optimize(train_bot)
+
+    wall_time = time.time() - time_start
+    mem_end = proc.memory_info().rss / 1e6
+
+    eval_calls = train_bot.eval_count
+    avg_eval_time_ms = (train_bot.eval_time / eval_calls) * 1e3 if eval_calls else 0
+    test_fitness = test_bot.evaluate(best_params)
+
+    metrics = {
+        "Optimizer": optimizer,
+        "Test$": round(test_fitness, 2),
+        "Fitness Calls": eval_calls,
+        "Total(s)": round(wall_time, 2),
+        "Avg Eval (ms)": round(avg_eval_time_ms, 2),
+        "Mem(MB)": round(max(mem_start, mem_end), 1),
+    }
+
+    return metrics, best_params
 
 def compare_dimensionality():
     common_cfg = COMMON_CFG

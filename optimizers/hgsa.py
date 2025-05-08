@@ -46,7 +46,7 @@ class HGSA(Optimizer):
                 if bot.evaluate(cand) > bot.evaluate(pop[i]):
                     pop[i] = cand
             temps = [t*0.95 for t in temps]       # cool
-            print(f"HGSA iter {it+1}/{self.max_iter}  best={g_val:.2f}")
+            print(f"HGSA iter {it+1}/{self.max_iter}  best={g_val:.2f}", end="\r")
             self.convergence_curve.append(g_val)
 
 

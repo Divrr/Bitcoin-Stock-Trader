@@ -1,13 +1,7 @@
-#!/usr/bin/env python3
-"""
-AI Trading Bot - dual-mode edition with evaluation cost tracking
-----------------------------------
-mode="blend" : original 14-parameter HIGH/LOW weighted-average crossover
-mode="macd"  : 3-parameter (optional 4) MACD strategy
-"""
-
 import numpy as np
-import time  # for evaluation timing
+import time
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # --- Weighted Moving Average kernels ---
 # Simple Moving Average kernel: equal weights over window of length N
@@ -35,7 +29,7 @@ def ema_kernel(N, alpha):
 # Pads input series by reflecting first window values to avoid edge effects
 
 def wma(P, kernel):
-    padding = -P[:len(kernel) - 1][::-1]  # flip and negate for padding
+    padding = -np.flip(P[1:len(kernel)]-P[0]) + P[0]  # flip and negate for padding
     P_padded = np.concatenate((padding, P))
     return np.convolve(P_padded, kernel, mode="valid")
 
@@ -57,6 +51,8 @@ class Evaluator:
         mode="macd" uses MACD strategy (3-4 parameters)
         """
         self.prices = np.array(prices, dtype=float)
+        self.df = pd.DataFrame(prices)
+        self.visualise = False
         self.mode   = mode
         self.params = None
 
@@ -101,18 +97,25 @@ class Evaluator:
         """
         Dispatch to the correct simulation based on mode.
         """
+        result = None
         if self.params is None:
             raise ValueError("Parameters not set")
         if self.mode == "blend":
-            return self._simulate_blend()
+            result = self._simulate_blend()
         elif self.mode == "macd":
-            return self._simulate_macd()
+            result = self._simulate_macd()
         elif self.mode == "2d_sma":
-            return self._simulate_2d_sma()
+            result = self._simulate_2d_sma()
         elif self.mode == "21d_macd":
-            return self._simulate_21d_macd()
+            result = self._simulate_21d_macd()
         else:
             raise ValueError("Unknown mode")
+        
+        if self.visualise and self.mode == "blend":
+            # unfortunately this is the only one I could build in the time I had
+            self.plot() 
+        
+        return result
 
     # ---- original weighted-average crossover ----------------------------
     def _simulate_blend(self):
@@ -139,6 +142,11 @@ class Evaluator:
         high = (w1h*sma_h + w2h*lma_h + w3h*ema_h) / (w1h + w2h + w3h + 1e-6)
         low  = (w1l*sma_l + w2l*lma_l + w3l*ema_l) / (w1l + w2l + w3l + 1e-6)
         signal = np.where(high > low, 1, -1)
+
+        if self.visualise:
+            self.df["high"] = high
+            self.df["low"] = low
+            self.df["signal"] = signal
 
         # backtest returns final cash amount
         return self._backtest(signal)
@@ -221,6 +229,7 @@ class Evaluator:
         # starting capital and no holdings
         cash, btc = 1000.0, 0.0
         fee = 0.03
+        cash_history = []
         
         for idx, price in enumerate(self.prices):
             if signal[idx] == 1 and cash > 0:
@@ -231,7 +240,41 @@ class Evaluator:
                 # sell full position
                 cash = btc * price * (1 - fee)
                 btc  = 0.0
+            cash_history.append(cash + btc*price)
         # liquidate any remaining BTC at final price
         if btc > 0:
             cash = btc * self.prices[-1] * (1 - fee)
+
+        if self.visualise:
+            self.df["cash"] = cash_history
+        
         return cash
+    
+    def plot(self):
+        # ONLY WORKS FOR BLEND MODE
+        signal = self.df["signal"]
+
+        prev_signal = signal.shift(1)
+        self.df["buy_signal"] = (prev_signal == -1) & (signal == 1)
+        self.df["sell_signal"] = (prev_signal == 1) & (signal == -1)
+
+        fig, ax1 = plt.subplots(figsize=(12, 6))
+
+        ax1.plot(self.df.index, self.df["close"], label="Close", linewidth=0.5)
+        ax1.plot(self.df.index, self.df["low"], label="Low", linestyle="--", alpha=0.5)
+        ax1.plot(self.df.index, self.df["high"], label="High", linestyle="--", alpha=0.5)
+
+        ax1.scatter(self.df.index[self.df['buy_signal']], self.df['close'][self.df['buy_signal']] + 2000, label="Buy Signal", marker="^", color="green", alpha=0.7, s=10)
+        ax1.scatter(self.df.index[self.df['sell_signal']], self.df['close'][self.df['sell_signal']] + 2000, label="Sell Signal", marker="v", color="red", alpha=0.7, s=10)
+
+        ax1.set_ylabel("Price")
+        ax1.legend(loc="upper left")
+
+        ax2 = ax1.twinx()
+        ax2.plot(self.df.index, self.df["cash"], label="Cash", color="purple", linewidth=0.5)
+        ax2.set_ylabel("Cash", color="purple")
+        ax2.tick_params(axis='y', labelcolor='purple')
+
+        plt.legend()
+        plt.title("High/Low/Signal over Time")
+        plt.show()
