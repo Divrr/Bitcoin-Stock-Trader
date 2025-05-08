@@ -13,9 +13,7 @@ This project explores the use of **nature-inspired optimization algorithms** to 
 │   ├── aco.py                     # Ant Colony Optimization
 │   ├── hgsa.py                    # Hybrid Gravitational Search Algorithm
 │   ├── ppso.py                    # Particle-based PSO variant
-│   ├── ccs.py                     # Chaotic Control Strategy
 │   ├── base.py                    # Base Optimizer class
-│   └── __init__.py
 │
 ├── visualization/                # All visual analysis and experiment scripts
 │   ├── compare.py                 # Statistical comparison with ANOVA and boxplot
