@@ -19,9 +19,12 @@ This project explores the use of **nature-inspired optimization algorithms** to 
 ├── visualization/                      # All visual analysis and experiment scripts used in the report
 │   ├── 1_dimensionality                # Evaluates optimizers' performance with 2D, 3D, 14D and 21D strategies
 │   ├── 2_macd_21d_pop_size.py          # Assesses impact on performance when varying pop_size for 21D MACD strategy
+│   ├── 3_assess_dataset_size.py        # Assesses impact on performance when varying starting date of dataset
 │   ├── 4_5_plot_2d_function_space.py   # Plots contour of 2D SMA parameter landscape
 │   ├── 6_btc_prices.py                 # Displays the bitcoin prices in test and training data
+│   ├── 7_test_time_mem.py              # Tests time and memory consumption with 2D, 3D, 14D and 21D strategies
 │   ├── 8_9_hyperparameter_impact.py    # Assesses effect of pop_size, max_iter, max_time on performance
+│   ├── 10_early_stopping_impact.py     # Assesses effect early stopping mechanisms on performance
 │   ├── 11_convergence_plot_1.py        # Single convergence plot per optimizer
 │   ├── 11_convergence_plot_9.py        # Grid of convergence plots across seeds
 │   ├── 11_convergence_test_profit.py   # Seed-based testing on unseen data
