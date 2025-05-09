@@ -64,8 +64,6 @@ class PPSO(Optimizer):
             calls_made = bot.eval_count - calls0
             if self._should_stop(start_time, calls_made, best_hist):
                 break
-
+        
+        print("")
         return g_best
-    
-    def __str__(self):
-        return f"PPSO(pop_size={self.pop_size}, max_iter={self.max_iter})"
