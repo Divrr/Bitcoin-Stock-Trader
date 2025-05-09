@@ -32,6 +32,7 @@ class CCS(Optimizer):
             if self._should_stop(start_time, calls_made, history):
                 break
 
+        print("")
         return best_point
 
     def _line_search(self, dim, point, bot, step_fraction=0.5, step_count=5):
@@ -53,6 +54,3 @@ class CCS(Optimizer):
         # update point
         point[dim] = best_coord
         return best_val
-
-    def __str__(self):
-        return f"CyclicCSS(max_iter={self.max_iter})"

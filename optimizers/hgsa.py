@@ -58,7 +58,5 @@ class HGSA(Optimizer):
             if self._should_stop(start_time, calls_made, best_hist):
                 break
 
+        print("")
         return g_best
-    
-    def __str__(self):
-        return f"HGSA(pop_size={self.pop_size}, max_iter={self.max_iter})"

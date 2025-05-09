@@ -69,3 +69,6 @@ class Optimizer(ABC):
     @abstractmethod
     def optimize(self, bot):
         pass
+
+    def __str__(self):
+        return self.__class__.__name__

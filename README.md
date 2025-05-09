@@ -6,33 +6,34 @@ This project explores the use of **nature-inspired optimization algorithms** to 
 
 ```
 ├── data/
-│   └── BTC-Daily.csv              # Historical daily price data for Bitcoin
+│   └── BTC-Daily.csv                   # Historical daily price data for Bitcoin
 │
-├── optimizers/                    # All optimization algorithms
-│   ├── igwo.py                    # Improved Grey Wolf Optimizer
-│   ├── aco.py                     # Ant Colony Optimization
-│   ├── hgsa.py                    # Hybrid Gravitational Search Algorithm
-│   ├── ppso.py                    # Particle-based PSO variant
-│   ├── ccs.py                     # Chaotic Control Strategy
-│   ├── base.py                    # Base Optimizer class
-│   └── __init__.py
+├── optimizers/                         # All optimization algorithms
+│   ├── igwo.py                         # Improved Grey Wolf Optimizer
+│   ├── aco.py                          # Ant Colony Optimization
+│   ├── hgsa.py                         # Hybrid Gravitational Search Algorithm
+│   ├── ppso.py                         # Particle-based PSO variant
+│   ├── ccs.py                          # Cyclic Coordinate Search
+│   ├── base.py                         # Base Optimizer class
 │
-├── visualization/                # All visual analysis and experiment scripts
-│   ├── compare.py                 # Statistical comparison with ANOVA and boxplot
-│   ├── compare21_d.py             # Population size sweep for 21D MACD strategy
-│   ├── dimensionality.py          # Evaluates optimizers over different strategy modes
-│   ├── generate_test_profit.py    # Seed-based testing on unseen data
-│   ├── hyperparameter_impact.py   # Effect of pop size, max_iter, max_time
-│   ├── plot_convergence.py        # Single convergence plot per optimizer
-│   ├── plot_convergence_diff.py   # Grid of convergence plots across seeds
-│   ├── plot_function_space_2.py   # Contour plots of parameter landscape
-│   ├── plot_moving_averages.py    # Plot of SMA, LMA, EMA overlays
-│   └── plot_prices.py             # Raw price plot (train/test)
+├── visualization/                      # All visual analysis and experiment scripts used in the report
+│   ├── 1_dimensionality                # Evaluates optimizers' performance with 2D, 3D, 14D and 21D strategies
+│   ├── 2_macd_21d_pop_size.py          # Assesses impact on performance when varying pop_size for 21D MACD strategy
+│   ├── 3_assess_dataset_size.py        # Assesses impact on performance when varying starting date of dataset
+│   ├── 4_5_plot_2d_function_space.py   # Plots contour of 2D SMA parameter landscape
+│   ├── 6_btc_prices.py                 # Displays the bitcoin prices in test and training data
+│   ├── 7_test_time_mem.py              # Tests time and memory consumption with 2D, 3D, 14D and 21D strategies
+│   ├── 8_9_hyperparameter_impact.py    # Assesses effect of pop_size, max_iter, max_time on performance
+│   ├── 10_early_stopping_impact.py     # Assesses effect early stopping mechanisms on performance
+│   ├── 11_convergence_plot_1.py        # Single convergence plot per optimizer
+│   ├── 11_convergence_plot_9.py        # Grid of convergence plots across seeds
+│   ├── 11_convergence_test_profit.py   # Seed-based testing on unseen data
+│   └── 12_boxplot_comparison.py        # Statistical comparison of the performance of all algorithms
 │
-├── config.py                     # Central config for data and optimizer settings
-├── evaluator.py                  # Trading logic simulator for all modes
-├── main.py                       # Runs full experiment and prints summary
-├── requirements.txt              # Required Python packages
+├── config.py                           # Central config for data and optimizer settings
+├── evaluator.py                        # Trading logic simulator for all modes
+├── main.py                             # Runs full experiment and prints summary
+└── requirements.txt                    # Required Python packages
 ```
 
 ## Optimization Strategies
@@ -53,19 +54,6 @@ The trading strategies are parameterized and evaluated via four modes:
 - `2d_sma` – Simple two-window SMA crossover (2D)
 - `21d_macd` – Enhanced MACD with custom filters (21D)
 
-
-## Results & Visualizations
-
-Generated visual insights include:
-
-- Optimizer performance comparisons (boxplots, barplots)
-- Evaluation of hyperparameters (population size, iteration count, time)
-- Dimensional impact analysis (2D vs 14D vs 21D)
-- Fitness landscape plots (contour maps)
-- Signal behavior plots for moving averages and MACD
-
-
-
 ## Contributors
 
 - Anushka Dissanayaka Mudiyanselage
@@ -77,3 +65,14 @@ Generated visual insights include:
 ---
 
 Feel free to fork, clone, and build upon this work for your own financial research and learning projects!
+
+## Acknowledgements
+### PPSO Implementation
+The implementation of PPSO is heavily inspired by the algorithm flowchart presented in M.Ghasemi, E.Akbari, A.Rahimnejad, S.E.Razavi, S.Ghavidel, andL.Li, “Phasor particle swarm optimization: a simple and efficient variant of pso,” *Soft Computing*, vol. 23, pp. 9701–9718, 2019.
+
+### Use of Artificial Intelligence
+While the core implementation and analysis in this project were authored by our team, we used ChatGPT (by OpenAI) selectively as a support tool during development. Specifically, ChatGPT was used for:
+- Debugging and troubleshooting when we encountered issues
+- Clarifying programming concepts and algorithm design
+
+Contributions generated with ChatGPT were reviewed and validated by the development team to ensure academic integrity and compliance with the University of Western Australia's guidelines for collaborative tools and non-plagiaristic AI usage.
